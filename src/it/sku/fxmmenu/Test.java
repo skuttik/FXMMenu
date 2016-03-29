@@ -21,14 +21,28 @@ public class Test extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        FXMMenu menu = new FXMMenu(150, Color.DIMGRAY, 
-                new FXMMenuItem(Color.CORAL, Color.BLACK, "A").setOnHold(e -> System.out.println("A HOLD")).setOnPressed(e -> System.out.println("A PRESSED")).setOnHoldReleased(e -> System.out.println("A RELEASED")),
-                new FXMMenuItem(Color.CORAL, Color.BLANCHEDALMOND, "F"),
-                new FXMMenuItem( Color.CORAL, Color.BLACK, "S"));
+        /*
+         FXMMenu menu = new FXMMenu(150, FXMMenu.Style.CIRCULAR, Color.DIMGRAY,
+         new FXMMenuItem(Color.CORAL, Color.BLACK, "1").setOnHold(e -> System.out.println("A HOLD")).setOnPressed(e -> System.out.println("A PRESSED")).setOnHoldReleased(e -> System.out.println("A RELEASED")),
+         new FXMMenuItem(Color.CORAL, Color.BLANCHEDALMOND, "2"),
+         new FXMMenuItem(Color.CORAL, Color.BLACK, "3"));
 
+         FXMMenuItem kmi = new FXMMenuItem(Color.CORAL, Color.BLACK, "4");
+         menu.add(kmi);
+         FXMMenuItem kmi1 = new FXMMenuItem(Color.CORAL, Color.BLACK, "5");
+         menu.add(kmi1);
+         FXMMenuItem kmi2 = new FXMMenuItem(Color.CORAL, Color.BLACK, "6");
+         menu.add(kmi2);
+         */
+        FXMMenu menu = new FXMMenu(100, FXMMenu.Style.CIRCULAR, Color.AQUA);
         menu.addCentralItem(new FXMMenuItem(Color.CHARTREUSE, Color.BLACK, "X"));
-        FXMMenuItem kmi = new FXMMenuItem(Color.CORAL, Color.BLACK, "N");
-        menu.add(kmi);
+        for (int i = 0; i < Math.random() * 10; i++) {
+            FXMMenuItem kmi1 = new FXMMenuItem(Color.CORAL, Color.BLACK, "" + i).
+                    setOnHold(e -> System.out.println("HOLD")).
+                    setOnPressed(e -> System.out.println("PRESSED")).
+                    setOnHoldReleased(e -> System.out.println("RELEASED"));
+            menu.add(kmi1);
+        }
         StackPane root = new StackPane();
         root.getChildren().add(menu);
 
