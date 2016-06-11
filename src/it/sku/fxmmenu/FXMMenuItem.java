@@ -42,7 +42,7 @@ public class FXMMenuItem extends Group {
     private EventHandler<ActionEvent> releaseHandler;
 
     public FXMMenuItem(Color bgColor, Color labelColor, String text) {
-        holdingLength = 2.0;
+        holdingLength = 1.5;
         circle = new Circle(10, bgColor);
         label = new Label(text);
         arc = new Arc();
