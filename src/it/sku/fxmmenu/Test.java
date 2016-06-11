@@ -11,11 +11,21 @@ import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// In this example a new menu is added to the scene when:
+//     right mouse button is pressed 
+//     or for long press of the left button
+//
+// The menu has circular shapes with a random number of menu items (doing nothing) 
+// and a central item for exiting test application
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  *
@@ -33,16 +43,19 @@ public class Test extends Application {
         primaryStage.setTitle("FXMenu");
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
+        
+        Duration longPressDuration = Duration.seconds(1.0);
+        Duration menuCreationDuration = Duration.seconds(0.4);
 
         scene.setOnMousePressed(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
                 FXMMenu menu = createMenu();
                 root.getChildren().add(menu);
-                menu.show(e.getSceneX(), e.getSceneY(), Duration.seconds(0.4));
+                menu.show(e.getSceneX(), e.getSceneY(), menuCreationDuration);
             } else if (e.getButton() == MouseButton.PRIMARY) {
                 showingMenu = createMenu();
                 root.getChildren().add(showingMenu);
-                showingMenu.delayedShow(Duration.seconds(1.0), e.getSceneX(), e.getSceneY(), Duration.seconds(0.4));
+                showingMenu.delayedShow(longPressDuration, e.getSceneX(), e.getSceneY(), menuCreationDuration);
             }
         });
 
@@ -72,9 +85,11 @@ public class Test extends Application {
          */
 
         FXMMenu menu = new FXMMenu(100, FXMMenu.Style.CIRCULAR, new Color(0.2, 0.2, 0.2, 0.76));
+        
         menu.addCentralItem(
                 new FXMMenuItem(Color.DIMGRAY, Color.BLACK, "X").
                 setOnPressed(e -> Platform.exit()));
+        
         for (int i = 0; i < (Math.random() * 4 + 2); i++) {
             String lbl = "" + i;
             menu.add(

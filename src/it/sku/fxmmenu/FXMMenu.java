@@ -49,6 +49,7 @@ public class FXMMenu extends Pane {
     private Timeline longPressTL;
     private Arc arc;
     private double holdingLength = 1;
+    private Timeline disappearTL;
 
     public FXMMenu(double size, Style style, Color color) {
         this.size = size;
@@ -83,6 +84,7 @@ public class FXMMenu extends Pane {
         arc.setStartAngle(90);
 
         longPressTL = null;
+        disappearTL = null;
     }
 
     public final void addAll(FXMMenuItem... items) {
@@ -184,15 +186,17 @@ public class FXMMenu extends Pane {
         arc.setBlendMode(BlendMode.SOFT_LIGHT);
         getChildren().add(arc);
 
-        Timeline disappearTL = new Timeline(new KeyFrame(duration.multiply(2.0), new KeyValue(arc.opacityProperty(), 0.0, Interpolator.EASE_BOTH)));
+        disappearTL = new Timeline(new KeyFrame(duration.multiply(1.2), new KeyValue(arc.opacityProperty(), 0.0, Interpolator.EASE_BOTH)));
         disappearTL.setOnFinished(e -> getChildren().remove(arc));
-        
+
+        arc.opacityProperty().setValue(0.0);
         longPressTL = new Timeline(
                 new KeyFrame(delay, (ActionEvent event) -> {
                     held = true;
                 }),
-                new KeyFrame(delay.divide(4), new KeyValue(arc.lengthProperty(), arc.lengthProperty().getValue(), Interpolator.DISCRETE)),
-                new KeyFrame(delay, new KeyValue(arc.lengthProperty(), -360, Interpolator.LINEAR))
+                new KeyFrame(delay.divide(2), new KeyValue(arc.lengthProperty(), arc.lengthProperty().getValue(), Interpolator.DISCRETE)),
+                new KeyFrame(delay, new KeyValue(arc.lengthProperty(), -360, Interpolator.LINEAR)),
+                new KeyFrame(delay, new KeyValue(arc.opacityProperty(), 1.0, Interpolator.EASE_IN))
         );
         longPressTL.setOnFinished(e -> {
             disappearTL.play();
@@ -202,7 +206,12 @@ public class FXMMenu extends Pane {
     }
 
     public void interruptDelayedShow() {
-        longPressTL.stop();
+        if (longPressTL != null) {
+            longPressTL.stop();
+        }
+        if (disappearTL != null) {
+            disappearTL.play();
+        }
     }
 
     public void show(double x, double y, Duration duration) {
@@ -241,12 +250,6 @@ public class FXMMenu extends Pane {
         new Timeline(new KeyFrame(Duration.seconds(wt), new KeyValue(base.opacityProperty(), 1.0, Interpolator.EASE_BOTH))).play();
         index++;
 
-//        getChildren().filtered((Node t) -> (t.getClass() == FXMMenuItem.class))
-//                .forEach((Node n) -> {
-//                    FXMMenuItem item = (FXMMenuItem) n;
-//                    item.setOpacity(1);
-//                    item.setMenuCenter(x, y);
-//                });
         for (FXMMenuItem item : items) {
             item.setMenuCenter(x, y);
             item.setOpacity(0);
