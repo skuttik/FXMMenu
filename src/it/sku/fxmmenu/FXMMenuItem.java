@@ -46,7 +46,7 @@ public class FXMMenuItem extends Group {
     private double refSize;
     private boolean held;
     private double holdingLength;
-    private Timeline longPressTL;
+    private final Timeline longPressTL;
     private EventHandler<ActionEvent> pressHandler = null;
     private EventHandler<ActionEvent> holdHandler = null;
     private EventHandler<ActionEvent> releaseHandler;
@@ -71,7 +71,7 @@ public class FXMMenuItem extends Group {
                 pieSlice.setType(ArcType.OPEN);
                 pieSlice.setStrokeLineCap(StrokeLineCap.BUTT);
                 pieSlice.setStroke(bgColor);
-                pieSlice.setFill(new Color(0., 0., 0., 0.0));
+                pieSlice.setFill(new Color(0.0, 0.0, 0.0, 1.0));
                 pieSlice.setOnMouseReleased(e -> {
                     applyMouseReleased(e);
                 });
@@ -123,8 +123,13 @@ public class FXMMenuItem extends Group {
     void init(double size, int totalNumber, int index) {
         refSize = size * .25;
         double d = 2 * Math.PI / totalNumber;
-        this.offsetX = size * 0.62 * Math.cos(d * index - Math.PI / 2);
-        this.offsetY = size * 0.62 * Math.sin(d * index - Math.PI / 2);
+        if (index == -1) {
+            offsetX = 0;
+            offsetY = 0;
+        } else {
+            offsetX = size * 0.62 * Math.cos(d * index - Math.PI / 2);
+            offsetY = size * 0.62 * Math.sin(d * index - Math.PI / 2);
+        }
 
         if (circle != null) {
             circle.setRadius(refSize);
@@ -132,7 +137,7 @@ public class FXMMenuItem extends Group {
         }
         if (pieSlice != null) {
             if (index == -1) {
-                System.err.println("ERROR: central item cannot be PIE");
+                System.err.println(this.getClass() + ": ERROR - central item cannot be PIE");
             } else {
                 double sliceLen = 360 / totalNumber - 6;
                 pieSlice.setLength(sliceLen);

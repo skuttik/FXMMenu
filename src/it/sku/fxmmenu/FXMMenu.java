@@ -5,7 +5,6 @@
  */
 package it.sku.fxmmenu;
 
-import java.util.ArrayList;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -29,8 +28,8 @@ public class FXMMenu extends Pane {
 
     public enum Style {
 
+        EMPTY,
         CIRCULAR,
-        PIE,
         POLYGONAL_CORNER,
         POLYGONAL_BASE
     }
@@ -87,8 +86,9 @@ public class FXMMenu extends Pane {
     }
 
     public final void addAll(FXMMenuItem... items) {
-        this.items = items;
-        arrange();
+        for(FXMMenuItem item : items){
+            add(item);
+        }
     }
 
     public final void addCentralItem(FXMMenuItem item) {
@@ -135,7 +135,7 @@ public class FXMMenu extends Pane {
             return;
         }
         getChildren().removeAll(items);
-        int n = this.items.length;
+        int n = items.length;
         double d = 2 * Math.PI / n;
         if (baseStyle == Style.POLYGONAL_CORNER || baseStyle == Style.POLYGONAL_BASE) {
             getChildren().remove(basePolygon);
@@ -147,6 +147,7 @@ public class FXMMenu extends Pane {
         int idx = 0;
         for (FXMMenuItem item : items) {
             item.init(size, n, idx);
+            item.setVisible(true);
             getChildren().add(item);
             idx++;
         }
@@ -206,6 +207,30 @@ public class FXMMenu extends Pane {
         }
     }
 
+    public void hide(Duration duration) {
+        Shape base = null;
+        switch (baseStyle) {
+            case CIRCULAR:
+                if (baseCircle != null) {
+                    base = baseCircle;
+                }
+                break;
+            case POLYGONAL_BASE:
+            case POLYGONAL_CORNER:
+                if (basePolygon != null) {
+                    base = basePolygon;
+                }
+                break;
+        }
+        if (base != null) {
+            base.setVisible(false);
+        }
+        centralItem.setVisible(false);
+        for (FXMMenuItem item : items) {
+            item.setVisible(false);
+        }
+    }
+
     public void show(double x, double y, Duration duration) {
         centerX = x;
         centerY = y;
@@ -216,7 +241,6 @@ public class FXMMenu extends Pane {
                 if (baseCircle != null) {
                     baseCircle.setCenterX(x);
                     baseCircle.setCenterY(y);
-                    arrange();
                     baseCircle.setVisible(true);
                     base = baseCircle;
                 }
@@ -224,13 +248,13 @@ public class FXMMenu extends Pane {
             case POLYGONAL_BASE:
             case POLYGONAL_CORNER:
                 if (basePolygon != null) {
-                    arrange();
                     basePolygon.setOnMouseClicked(null);
                     basePolygon.setVisible(true);
                     base = basePolygon;
                 }
                 break;
         }
+        arrange();
 
         centralItem.setVisible(true);
         for (FXMMenuItem item : items) {

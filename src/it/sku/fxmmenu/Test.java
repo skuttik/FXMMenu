@@ -27,7 +27,6 @@ import javafx.util.Duration;
 // and a central item for exiting test application
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
 /**
  *
  * @author skuttik
@@ -44,7 +43,7 @@ public class Test extends Application {
         primaryStage.setTitle("FXMenu");
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
-        
+
         Duration longPressDuration = Duration.seconds(1.0);
         Duration menuCreationDuration = Duration.seconds(0.4);
 
@@ -85,16 +84,19 @@ public class Test extends Application {
          menu.add(kmi2);
          */
 
-        FXMMenu menu = new FXMMenu(100, FXMMenu.Style.PIE, new Color(0.2, 0.2, 0.2, 0.76));
-        
+        FXMMenu menu = new FXMMenu(100, FXMMenu.Style.EMPTY, new Color(0.2, 0.2, 0.2, 0.76));
+
         menu.addCentralItem(
                 new FXMMenuItem(Style.CIRCULAR, Color.DIMGRAY, Color.BLACK, "X", null).
+                setOnPressed(e -> menu.hide(Duration.ZERO)));
+        menu.add(
+                new FXMMenuItem(Style.PIE, Color.RED, Color.WHITE, "Q", null).
                 setOnPressed(e -> Platform.exit()));
-        
+
         for (int i = 0; i < (Math.random() * 4 + 2); i++) {
             String lbl = "" + i;
             menu.add(
-                    new FXMMenuItem(Style.CIRCULAR, Color.CORAL, Color.BLACK, lbl, null).
+                    new FXMMenuItem(Style.PIE, Color.CORAL, Color.BLACK, lbl, null).
                     setOnHold(e -> System.out.println("HOLD " + lbl)).
                     setOnPressed(e -> System.out.println("PRESSED " + lbl)).
                     setOnHoldReleased(e -> System.out.println("RELEASED " + lbl)));
