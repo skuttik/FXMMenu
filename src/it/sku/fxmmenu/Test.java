@@ -5,6 +5,7 @@
  */
 package it.sku.fxmmenu;
 
+import it.sku.fxmmenu.FXMMenuItem.Style;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
@@ -84,16 +85,16 @@ public class Test extends Application {
          menu.add(kmi2);
          */
 
-        FXMMenu menu = new FXMMenu(100, FXMMenu.Style.CIRCULAR, new Color(0.2, 0.2, 0.2, 0.76));
+        FXMMenu menu = new FXMMenu(100, FXMMenu.Style.PIE, new Color(0.2, 0.2, 0.2, 0.76));
         
         menu.addCentralItem(
-                new FXMMenuItem(Color.DIMGRAY, Color.BLACK, "X").
+                new FXMMenuItem(Style.CIRCULAR, Color.DIMGRAY, Color.BLACK, "X", null).
                 setOnPressed(e -> Platform.exit()));
         
         for (int i = 0; i < (Math.random() * 4 + 2); i++) {
             String lbl = "" + i;
             menu.add(
-                    new FXMMenuItem(Color.CORAL, Color.BLACK, lbl).
+                    new FXMMenuItem(Style.CIRCULAR, Color.CORAL, Color.BLACK, lbl, null).
                     setOnHold(e -> System.out.println("HOLD " + lbl)).
                     setOnPressed(e -> System.out.println("PRESSED " + lbl)).
                     setOnHoldReleased(e -> System.out.println("RELEASED " + lbl)));

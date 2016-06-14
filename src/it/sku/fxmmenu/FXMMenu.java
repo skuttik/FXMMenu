@@ -5,11 +5,11 @@
  */
 package it.sku.fxmmenu;
 
+import java.util.ArrayList;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -27,11 +27,10 @@ import javafx.util.Duration;
  */
 public class FXMMenu extends Pane {
 
-    private boolean held;
-
     public enum Style {
 
         CIRCULAR,
+        PIE,
         POLYGONAL_CORNER,
         POLYGONAL_BASE
     }
@@ -48,7 +47,6 @@ public class FXMMenu extends Pane {
 
     private Timeline longPressTL;
     private Arc arc;
-    private double holdingLength = 1;
     private Timeline disappearTL;
 
     public FXMMenu(double size, Style style, Color color) {
@@ -72,11 +70,12 @@ public class FXMMenu extends Pane {
             baseCircle = new Circle(size, color);
             baseCircle.opacityProperty().set(1.0);
             baseCircle.setVisible(false);
+            baseCircle.setMouseTransparent(false);
             getChildren().add(baseCircle);
         }
 
         arc = new Arc();
-        arc.setMouseTransparent(true);
+        arc.setMouseTransparent(false);
         arc.setType(ArcType.OPEN);
         arc.setStrokeLineCap(StrokeLineCap.ROUND);
         arc.setStroke(Color.BEIGE);
@@ -95,7 +94,7 @@ public class FXMMenu extends Pane {
     public final void addCentralItem(FXMMenuItem item) {
         centralItem = item;
         centralItem.setVisible(false);
-        centralItem.init(size * .25, 0, 0);
+        centralItem.init(size, -1, -1);
         getChildren().add(centralItem);
     }
 
@@ -111,7 +110,6 @@ public class FXMMenu extends Pane {
             items = new FXMMenuItem[1];
             items[0] = item;
         }
-        arrange();
     }
 
     private double[] getPolygonVertices(int number, double delta) {
@@ -143,17 +141,18 @@ public class FXMMenu extends Pane {
             getChildren().remove(basePolygon);
             basePolygon = new Polygon(getPolygonVertices(n, d));
             basePolygon.opacityProperty().set(1.0);
+            basePolygon.setMouseTransparent(false);
             getChildren().add(basePolygon);
         }
         int idx = 0;
         for (FXMMenuItem item : items) {
-            item.init(size * .25, size * 0.62 * Math.cos(d * idx - Math.PI / 2), size * 0.62 * Math.sin(d * idx - Math.PI / 2));
+            item.init(size, n, idx);
             getChildren().add(item);
             idx++;
         }
         if (centralItem != null) {
             getChildren().remove(centralItem);
-            getChildren().addAll(centralItem);
+            getChildren().add(centralItem);
         }
     }
 
@@ -173,10 +172,6 @@ public class FXMMenu extends Pane {
         this.color = color;
     }
 
-    public void setDelayTime(double holdingLength) {
-        this.holdingLength = holdingLength;
-    }
-
     public void delayedShow(Duration delay, double x, double y, Duration duration) {
         arc.setLayoutX(x);
         arc.setLayoutY(y);
@@ -191,9 +186,6 @@ public class FXMMenu extends Pane {
 
         arc.opacityProperty().setValue(0.0);
         longPressTL = new Timeline(
-                new KeyFrame(delay, (ActionEvent event) -> {
-                    held = true;
-                }),
                 new KeyFrame(delay.divide(2), new KeyValue(arc.lengthProperty(), arc.lengthProperty().getValue(), Interpolator.DISCRETE)),
                 new KeyFrame(delay, new KeyValue(arc.lengthProperty(), -360, Interpolator.LINEAR)),
                 new KeyFrame(delay, new KeyValue(arc.opacityProperty(), 1.0, Interpolator.EASE_IN))
@@ -219,21 +211,25 @@ public class FXMMenu extends Pane {
         centerY = y;
 
         Shape base = null;
-        if (baseCircle != null) {
-            baseCircle.setCenterX(x);
-            baseCircle.setCenterY(y);
-            baseCircle.setVisible(true);
-            base = baseCircle;
-        }
-        if (basePolygon != null) {
-            arrange();
-            basePolygon.setOnMouseClicked(null);
-            basePolygon.setVisible(true);
-            base = basePolygon;
-        }
-
-        if (base == null) {
-            return;
+        switch (baseStyle) {
+            case CIRCULAR:
+                if (baseCircle != null) {
+                    baseCircle.setCenterX(x);
+                    baseCircle.setCenterY(y);
+                    arrange();
+                    baseCircle.setVisible(true);
+                    base = baseCircle;
+                }
+                break;
+            case POLYGONAL_BASE:
+            case POLYGONAL_CORNER:
+                if (basePolygon != null) {
+                    arrange();
+                    basePolygon.setOnMouseClicked(null);
+                    basePolygon.setVisible(true);
+                    base = basePolygon;
+                }
+                break;
         }
 
         centralItem.setVisible(true);
@@ -241,15 +237,17 @@ public class FXMMenu extends Pane {
             item.setVisible(true);
         }
 
-        base.setOnMouseClicked(null);
-        base.setOpacity(0.0);
         int index = 0;
         double wt = duration.toSeconds() / (items.length + 1);
         double at = duration.toSeconds() / (items.length + 1) * 2.0;
 
-        new Timeline(new KeyFrame(Duration.seconds(wt), new KeyValue(base.opacityProperty(), 1.0, Interpolator.EASE_BOTH))).play();
-        index++;
+        if (base != null) {
+            base.setOnMouseClicked(null);
+            base.setOpacity(0.0);
+            new Timeline(new KeyFrame(Duration.seconds(wt), new KeyValue(base.opacityProperty(), 1.0, Interpolator.EASE_BOTH))).play();
+        }
 
+        index++;
         for (FXMMenuItem item : items) {
             item.setMenuCenter(x, y);
             item.setOpacity(0);
