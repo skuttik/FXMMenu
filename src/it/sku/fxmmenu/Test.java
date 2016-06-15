@@ -5,7 +5,7 @@
  */
 package it.sku.fxmmenu;
 
-import it.sku.fxmmenu.FXMMenuItem.Style;
+import it.sku.fxmmenu.FXMMenuItem.ItemStyle;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
@@ -50,12 +50,10 @@ public class Test extends Application {
         scene.setOnMousePressed(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
                 FXMMenu menu = createMenu();
-                root.getChildren().add(menu);
-                menu.show(e.getSceneX(), e.getSceneY(), menuCreationDuration);
+                menu.show(root, e.getSceneX(), e.getSceneY(), menuCreationDuration);
             } else if (e.getButton() == MouseButton.PRIMARY) {
                 showingMenu = createMenu();
-                root.getChildren().add(showingMenu);
-                showingMenu.delayedShow(longPressDuration, e.getSceneX(), e.getSceneY(), menuCreationDuration);
+                showingMenu.delayedShow(root, longPressDuration, e.getSceneX(), e.getSceneY(), menuCreationDuration);
             }
         });
 
@@ -65,38 +63,29 @@ public class Test extends Application {
             }
         });
         primaryStage.show();
-
-//        menu.show(250, 250, Duration.ZERO);
     }
 
     private FXMMenu createMenu() {
-        /*
-         FXMMenu menu = new FXMMenu(150, FXMMenu.Style.CIRCULAR, Color.DIMGRAY,
-         new FXMMenuItem(Color.CORAL, Color.BLACK, "1").setOnHold(e -> System.out.println("A HOLD")).setOnPressed(e -> System.out.println("A PRESSED")).setOnHoldReleased(e -> System.out.println("A RELEASED")),
-         new FXMMenuItem(Color.CORAL, Color.BLANCHEDALMOND, "2"),
-         new FXMMenuItem(Color.CORAL, Color.BLACK, "3"));
-
-         FXMMenuItem kmi = new FXMMenuItem(Color.CORAL, Color.BLACK, "4");
-         menu.add(kmi);
-         FXMMenuItem kmi1 = new FXMMenuItem(Color.CORAL, Color.BLACK, "5");
-         menu.add(kmi1);
-         FXMMenuItem kmi2 = new FXMMenuItem(Color.CORAL, Color.BLACK, "6");
-         menu.add(kmi2);
-         */
+        FXMSubMenu submenu = new FXMSubMenu(ItemStyle.CIRCULAR, Color.BLUE, Color.WHITE, "SB", null, "Submenu", 100, FXMMenu.Style.CIRCULAR, Color.BLUE);
+        for (int i = 0; i < 5; i++) {
+            String lbl = "S" + i;
+            submenu.add(new FXMMenuItem(ItemStyle.CIRCULAR, Color.BLUE, Color.WHITE, lbl, null, lbl).
+                    setOnHold(e -> System.out.println("HOLD " + lbl)).
+                    setOnPressed(e -> System.out.println("PRESSED " + lbl)).
+                    setOnHoldReleased(e -> System.out.println("RELEASED " + lbl)));
+        }
 
         FXMMenu menu = new FXMMenu(100, FXMMenu.Style.EMPTY, new Color(0.2, 0.2, 0.2, 0.76));
 
-        menu.addCentralItem(
-                new FXMMenuItem(Style.CIRCULAR, Color.DIMGRAY, Color.BLACK, "X", null).
+        menu.addCentralItem(new FXMMenuItem(ItemStyle.CIRCULAR, Color.DIMGRAY, Color.BLACK, "X", null, "Close").
                 setOnPressed(e -> menu.hide(Duration.ZERO)));
-        menu.add(
-                new FXMMenuItem(Style.PIE, Color.RED, Color.WHITE, "Q", null).
+        menu.add(new FXMMenuItem(ItemStyle.CIRCULAR, Color.RED, Color.WHITE, "Q", null, "Quit").
                 setOnPressed(e -> Platform.exit()));
+        menu.add(submenu);
 
         for (int i = 0; i < (Math.random() * 4 + 2); i++) {
             String lbl = "" + i;
-            menu.add(
-                    new FXMMenuItem(Style.PIE, Color.CORAL, Color.BLACK, lbl, null).
+            menu.add(new FXMMenuItem(ItemStyle.CIRCULAR, Color.CORAL, Color.BLACK, lbl, null, lbl).
                     setOnHold(e -> System.out.println("HOLD " + lbl)).
                     setOnPressed(e -> System.out.println("PRESSED " + lbl)).
                     setOnHoldReleased(e -> System.out.println("RELEASED " + lbl)));

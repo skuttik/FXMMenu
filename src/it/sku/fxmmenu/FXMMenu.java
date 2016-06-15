@@ -9,8 +9,8 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.scene.Group;
 import javafx.scene.effect.BlendMode;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
@@ -24,7 +24,7 @@ import javafx.util.Duration;
  *
  * @author skuttik
  */
-public class FXMMenu extends Pane {
+public class FXMMenu extends Group {
 
     public enum Style {
 
@@ -34,11 +34,12 @@ public class FXMMenu extends Pane {
         POLYGONAL_BASE
     }
 
+    private Group container = null;
     private Circle baseCircle = null;
     private Polygon basePolygon = null;
     double size;
     private Color color;
-    private FXMMenuItem items[];
+    private FXMAbstractItem items[];
     private FXMMenuItem centralItem = null;
     private final Style baseStyle;
     private double centerX = 0;
@@ -54,14 +55,6 @@ public class FXMMenu extends Pane {
         this.baseStyle = style;
         create();
         arrange();
-    }
-
-    public FXMMenu(double size, Style style, Color color, FXMMenuItem... items) {
-        this.size = size;
-        this.color = color;
-        this.baseStyle = style;
-        create();
-        addAll(items);
     }
 
     private void create() {
@@ -85,29 +78,33 @@ public class FXMMenu extends Pane {
         disappearTL = null;
     }
 
-    public final void addAll(FXMMenuItem... items) {
-        for(FXMMenuItem item : items){
-            add(item);
-        }
-    }
-
     public final void addCentralItem(FXMMenuItem item) {
         centralItem = item;
-        centralItem.setVisible(false);
+        centralItem.getNode().setVisible(false);
         centralItem.init(size, -1, -1);
-        getChildren().add(centralItem);
+        getChildren().add(centralItem.getNode());
+    }
+
+    public final void add(FXMSubMenu submenu) {
+        addItem(submenu);
+        submenu.setParentMenu(this);
+        getChildren().add(submenu);
     }
 
     public final void add(FXMMenuItem item) {
-        item.setVisible(false);
+        addItem(item);
+    }
+
+    private void addItem(FXMAbstractItem item) {
+        item.getNode().setVisible(false);
         if (items != null) {
             int s = items.length;
-            FXMMenuItem newItems[] = new FXMMenuItem[s + 1];
+            FXMAbstractItem newItems[] = new FXMAbstractItem[s + 1];
             System.arraycopy(this.items, 0, newItems, 0, s);
             newItems[s] = item;
             items = newItems;
         } else {
-            items = new FXMMenuItem[1];
+            items = new FXMAbstractItem[1];
             items[0] = item;
         }
     }
@@ -134,7 +131,9 @@ public class FXMMenu extends Pane {
         if (items == null) {
             return;
         }
-        getChildren().removeAll(items);
+        for (FXMAbstractItem item : items) {
+            getChildren().remove(item.getNode());
+        }
         int n = items.length;
         double d = 2 * Math.PI / n;
         if (baseStyle == Style.POLYGONAL_CORNER || baseStyle == Style.POLYGONAL_BASE) {
@@ -145,15 +144,15 @@ public class FXMMenu extends Pane {
             getChildren().add(basePolygon);
         }
         int idx = 0;
-        for (FXMMenuItem item : items) {
+        for (FXMAbstractItem item : items) {
             item.init(size, n, idx);
-            item.setVisible(true);
-            getChildren().add(item);
+            item.getNode().setVisible(true);
+            getChildren().add(item.getNode());
             idx++;
         }
         if (centralItem != null) {
-            getChildren().remove(centralItem);
-            getChildren().add(centralItem);
+            getChildren().remove(centralItem.getNode());
+            getChildren().add(centralItem.getNode());
         }
     }
 
@@ -173,7 +172,7 @@ public class FXMMenu extends Pane {
         this.color = color;
     }
 
-    public void delayedShow(Duration delay, double x, double y, Duration duration) {
+    public void delayedShow(Group container, Duration delay, double x, double y, Duration duration) {
         arc.setLayoutX(x);
         arc.setLayoutY(y);
         arc.setRadiusX(size / 2);
@@ -193,7 +192,7 @@ public class FXMMenu extends Pane {
         );
         longPressTL.setOnFinished(e -> {
             disappearTL.play();
-            show(x, y, duration);
+            show(container, x, y, duration);
         });
         longPressTL.play();
     }
@@ -225,13 +224,17 @@ public class FXMMenu extends Pane {
         if (base != null) {
             base.setVisible(false);
         }
-        centralItem.setVisible(false);
-        for (FXMMenuItem item : items) {
-            item.setVisible(false);
+        centralItem.getNode().setVisible(false);
+        for (FXMAbstractItem item : items) {
+            item.getNode().setVisible(false);
         }
     }
 
-    public void show(double x, double y, Duration duration) {
+    public void show(Group container, double x, double y, Duration duration) {
+        if (this.container == null) {
+            this.container = container;
+            container.getChildren().add(this);
+        }
         centerX = x;
         centerY = y;
 
@@ -256,9 +259,9 @@ public class FXMMenu extends Pane {
         }
         arrange();
 
-        centralItem.setVisible(true);
-        for (FXMMenuItem item : items) {
-            item.setVisible(true);
+        centralItem.getNode().setVisible(true);
+        for (FXMAbstractItem item : items) {
+            item.getNode().setVisible(true);
         }
 
         int index = 0;
@@ -272,19 +275,19 @@ public class FXMMenu extends Pane {
         }
 
         index++;
-        for (FXMMenuItem item : items) {
-            item.setMenuCenter(x, y);
-            item.setOpacity(0);
-            new Timeline(new KeyFrame(Duration.seconds(wt * index), new KeyValue(item.opacityProperty(), 0.0, Interpolator.DISCRETE)),
-                    new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(item.opacityProperty(), 1.0, Interpolator.EASE_IN)))
+        for (FXMAbstractItem item : items) {
+            item.setMenuCenter(this, x, y);
+            item.getNode().setOpacity(0);
+            new Timeline(new KeyFrame(Duration.seconds(wt * index), new KeyValue(item.getNode().opacityProperty(), 0.0, Interpolator.DISCRETE)),
+                    new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(item.getNode().opacityProperty(), 1.0, Interpolator.EASE_IN)))
                     .play();
             index++;
         }
         if (centralItem != null) {
-            centralItem.setMenuCenter(x, y);
-            centralItem.setOpacity(0);
-            new Timeline(new KeyFrame(Duration.seconds(wt * index), new KeyValue(centralItem.opacityProperty(), 0.0, Interpolator.DISCRETE)),
-                    new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(centralItem.opacityProperty(), 1.0, Interpolator.EASE_IN)))
+            centralItem.setMenuCenter(this, x, y);
+            centralItem.getNode().setOpacity(0);
+            new Timeline(new KeyFrame(Duration.seconds(wt * index), new KeyValue(centralItem.getNode().opacityProperty(), 0.0, Interpolator.DISCRETE)),
+                    new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(centralItem.getNode().opacityProperty(), 1.0, Interpolator.EASE_IN)))
                     .play();
         }
     }

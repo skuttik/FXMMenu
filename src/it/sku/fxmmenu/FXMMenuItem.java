@@ -5,7 +5,6 @@
  */
 package it.sku.fxmmenu;
 
-import java.util.Optional;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -13,8 +12,10 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Arc;
@@ -29,16 +30,18 @@ import javax.swing.ImageIcon;
  *
  * @author skuttik
  */
-public class FXMMenuItem extends Group {
+public class FXMMenuItem implements FXMAbstractItem {
 
-    public enum Style {
+    public enum ItemStyle {
 
         CIRCULAR,
         PIE
     }
 
+    private final Group itemGroup;
     private Circle circle = null;
     private Label label = null;
+    private Label tooltip = null;
     private Arc pieSlice = null;
     private final Arc arc;
     private double offsetX;
@@ -49,21 +52,47 @@ public class FXMMenuItem extends Group {
     private final Timeline longPressTL;
     private EventHandler<ActionEvent> pressHandler = null;
     private EventHandler<ActionEvent> holdHandler = null;
-    private EventHandler<ActionEvent> releaseHandler;
+    private EventHandler<ActionEvent> releaseHandler = null;
+    private Color bgColor;
+    private Color labelColor;
+    private String labelText;
+    private final ItemStyle itemStyle;
+    private ImageIcon icon;
 
-    public FXMMenuItem(Style style, Color bgColor, Color labelColor, String text, ImageIcon icon) {
+    public FXMMenuItem(ItemStyle itemStyle, Color bgColor, Color labelColor, String labelText, ImageIcon icon, String tooltipText) {
         holdingLength = 1.5;
-        switch (style) {
+        this.itemStyle = itemStyle;
+        this.bgColor = bgColor;
+        this.labelColor = labelColor;
+        this.labelText = labelText;
+
+        itemGroup = new Group();
+
+        switch (itemStyle) {
             case CIRCULAR:
                 circle = new Circle(10, bgColor);
                 circle.setMouseTransparent(false);
                 circle.setOnMouseReleased(e -> {
-                    applyMouseReleased(e);
+                    if (e.getButton() == MouseButton.PRIMARY) {
+                        applyMouseReleased(e);
+                    } else {
+                        e.consume();
+                    }
                 });
                 circle.setOnMousePressed(e -> {
-                    applyMousePressed(e);
+                    if (e.getButton() == MouseButton.PRIMARY) {
+                        applyMousePressed(e);
+                    } else {
+                        e.consume();
+                    }
                 });
-                getChildren().add(circle);
+                circle.setOnMouseEntered(e -> {
+                    applyMouseOver(e);
+                });
+                circle.setOnMouseExited(e -> {
+                    applyMouseOff(e);
+                });
+                itemGroup.getChildren().add(circle);
                 break;
             case PIE:
                 pieSlice = new Arc();
@@ -73,20 +102,34 @@ public class FXMMenuItem extends Group {
                 pieSlice.setStroke(bgColor);
                 pieSlice.setFill(new Color(0.0, 0.0, 0.0, 1.0));
                 pieSlice.setOnMouseReleased(e -> {
-                    applyMouseReleased(e);
+                    if (e.getButton() == MouseButton.PRIMARY) {
+                        applyMouseReleased(e);
+                    } else {
+                        e.consume();
+                    }
                 });
                 pieSlice.setOnMousePressed(e -> {
-                    applyMousePressed(e);
+                    if (e.getButton() == MouseButton.PRIMARY) {
+                        applyMousePressed(e);
+                    } else {
+                        e.consume();
+                    }
                 });
-                getChildren().add(pieSlice);
+                pieSlice.setOnMouseEntered(e -> {
+                    applyMouseOver(e);
+                });
+                pieSlice.setOnMouseExited(e -> {
+                    applyMouseOff(e);
+                });
+                itemGroup.getChildren().add(pieSlice);
                 break;
         }
 
-        if (text != null && !text.equals("")) {
-            label = new Label(text);
+        if (labelText != null && !labelText.equals("")) {
+            label = new Label(labelText);
             label.setTextFill(labelColor);
             label.setMouseTransparent(true);
-            getChildren().add(label);
+            itemGroup.getChildren().add(label);
         }
 
         arc = new Arc();
@@ -96,7 +139,13 @@ public class FXMMenuItem extends Group {
         arc.setStroke(Color.BEIGE);
         arc.setFill(new Color(0, 0, 0, 0));
         arc.setStartAngle(90);
-        getChildren().add(arc);
+        itemGroup.getChildren().add(arc);
+
+        if (tooltipText != null) {
+            tooltip = new Label(tooltipText);
+            tooltip.setVisible(false);
+            itemGroup.getChildren().add(tooltip);
+        }
 
         offsetX = 0.0;
         offsetY = 0.0;
@@ -120,7 +169,13 @@ public class FXMMenuItem extends Group {
         });
     }
 
-    void init(double size, int totalNumber, int index) {
+    @Override
+    public Node getNode() {
+        return itemGroup;
+    }
+
+    @Override
+    public void init(double size, int totalNumber, int index) {
         refSize = size * .25;
         double d = 2 * Math.PI / totalNumber;
         if (index == -1) {
@@ -158,8 +213,46 @@ public class FXMMenuItem extends Group {
         arc.setBlendMode(BlendMode.SOFT_LIGHT);
     }
 
+    public ItemStyle getItemStyle() {
+        return itemStyle;
+    }
+
+    public Color getBgColor() {
+        return bgColor;
+    }
+
+    public Color getLabelColor() {
+        return labelColor;
+    }
+
+    public String getLabelText() {
+        return labelText;
+    }
+
+    public ImageIcon getIcon() {
+        return icon;
+    }
+
+    public String getTooltip() {
+        return tooltip.getText();
+    }
+
     private void applyMousePressed(MouseEvent e) {
         longPressTL.play();
+        e.consume();
+    }
+
+    private void applyMouseOver(MouseEvent e) {
+        if (tooltip != null) {
+            tooltip.setVisible(true);
+        }
+        e.consume();
+    }
+
+    private void applyMouseOff(MouseEvent e) {
+        if (tooltip != null) {
+            tooltip.setVisible(false);
+        }
         e.consume();
     }
 
@@ -183,7 +276,8 @@ public class FXMMenuItem extends Group {
         e.consume();
     }
 
-    void setMenuCenter(double x, double y) {
+    @Override
+    public void setMenuCenter(Group container, double x, double y) {
         if (circle != null) {
             circle.setCenterX(offsetX + x);
             circle.setCenterY(offsetY + y);
@@ -222,5 +316,4 @@ public class FXMMenuItem extends Group {
         releaseHandler = handler;
         return this;
     }
-
 }
