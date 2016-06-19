@@ -15,6 +15,8 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -23,14 +25,15 @@ import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
-import javax.swing.ImageIcon;
 
 /**
  *
  * @author skuttik
  */
 public class FXMMenuItem implements FXMAbstractItem {
+
     private boolean activeValue = true;
 
     public enum ItemStyle {
@@ -58,14 +61,19 @@ public class FXMMenuItem implements FXMAbstractItem {
     private Color labelColor;
     private String labelText;
     private final ItemStyle itemStyle;
-    private ImageIcon icon;
+    private ImageView icon;
 
-    public FXMMenuItem(ItemStyle itemStyle, Color bgColor, Color labelColor, String labelText, ImageIcon icon, String tooltipText) {
+    public FXMMenuItem(ItemStyle itemStyle, Color bgColor, Color labelColor, String labelText, Image itemImage, String tooltipText) {
         holdingLength = 1.5;
         this.itemStyle = itemStyle;
         this.bgColor = bgColor;
         this.labelColor = labelColor;
         this.labelText = labelText;
+        if (itemImage != null) {
+            this.icon = new ImageView(itemImage);
+        } else {
+            this.icon = null;
+        }
 
         itemGroup = new Group();
 
@@ -126,10 +134,35 @@ public class FXMMenuItem implements FXMAbstractItem {
                 break;
         }
 
+        if (icon != null) {
+            itemGroup.getChildren().add(icon);
+            icon.setOnMouseReleased(e -> {
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    applyMouseReleased(e);
+                } else {
+                    e.consume();
+                }
+            });
+            icon.setOnMousePressed(e -> {
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    applyMousePressed(e);
+                } else {
+                    e.consume();
+                }
+            });
+            icon.setOnMouseEntered(e -> {
+                applyMouseOver(e);
+            });
+            icon.setOnMouseExited(e -> {
+                applyMouseOff(e);
+            });
+        }
+
         if (labelText != null && !labelText.equals("")) {
             label = new Label(labelText);
             label.setTextFill(labelColor);
             label.setMouseTransparent(true);
+            label.setTextAlignment(TextAlignment.CENTER);
             label.setOnMouseEntered(e -> {
                 applyMouseOver(e);
             });
@@ -152,6 +185,9 @@ public class FXMMenuItem implements FXMAbstractItem {
             tooltip = new Label(tooltipText);
             tooltip.setMouseTransparent(true);
             tooltip.setVisible(false);
+            tooltip.setTextAlignment(TextAlignment.CENTER);
+            tooltip.setStyle("-fx-font-size: 14px; -fx-text-fill: wheat;");
+            tooltip.setBlendMode(BlendMode.ADD);
             itemGroup.getChildren().add(tooltip);
         }
 
@@ -183,7 +219,8 @@ public class FXMMenuItem implements FXMAbstractItem {
     }
 
     @Override
-    public void init(double size, int totalNumber, int index) {
+    public void init(double size, int totalNumber, int index
+    ) {
         refSize = size * .25;
         double d = 2 * Math.PI / totalNumber;
         if (index == -1) {
@@ -197,6 +234,7 @@ public class FXMMenuItem implements FXMAbstractItem {
         if (circle != null) {
             circle.setRadius(refSize);
         }
+
         if (pieSlice != null) {
             if (index == -1) {
                 System.err.println(this.getClass() + ": ERROR - central item cannot be PIE");
@@ -212,6 +250,14 @@ public class FXMMenuItem implements FXMAbstractItem {
 
         if (label != null) {
             label.setFont(new Font(refSize));
+        }
+
+        if (icon != null) {
+            double scaleFactorX = refSize * 2 / icon.getImage().getWidth();
+            double scaleFactorY = refSize * 2 / icon.getImage().getHeight();
+
+            icon.setScaleX(scaleFactorX);
+            icon.setScaleY(scaleFactorY);
         }
 
         arc.setRadiusX(refSize + size / 20);
@@ -236,7 +282,7 @@ public class FXMMenuItem implements FXMAbstractItem {
         return labelText;
     }
 
-    public ImageIcon getIcon() {
+    public ImageView getIcon() {
         return icon;
     }
 
@@ -305,15 +351,25 @@ public class FXMMenuItem implements FXMAbstractItem {
             label.setLayoutX(offsetX + x - refSize * .3);
             label.setLayoutY(offsetY + y - refSize * .74);
         }
+        if (tooltip != null) {
+            tooltip.setLayoutX(offsetX * 2 + x);
+            tooltip.setLayoutY(offsetY * 2 + y);
+        }
         arc.setCenterX(offsetX + x);
         arc.setCenterY(offsetY + y);
+        icon.setX(offsetX + x - icon.getImage().getWidth() / 2);
+        icon.setY(offsetY + y - icon.getImage().getHeight() / 2);
     }
-   
+
     @Override
-        public void setActive(boolean value) {
+    public void setActive(boolean value) {
         activeValue = value;
     }
-        
+
+    @Override
+       public void close(boolean animated) {
+    }
+
     public double getHoldingLength() {
         return holdingLength;
     }

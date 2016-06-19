@@ -8,9 +8,8 @@ package it.sku.fxmmenu;
 import it.sku.fxmmenu.FXMMenuItem.ItemStyle;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
-import javax.swing.ImageIcon;
 
 /**
  *
@@ -26,27 +25,27 @@ public class FXMSubMenu extends FXMMenu implements FXMAbstractItem {
     private double offsetY;
     private boolean activeValue = true;
 
-    public FXMSubMenu(ItemStyle itemStyle, Color bgColor, Color labelColor, String labelText, ImageIcon icon, String tooltipText,
-            FXMMenu parentMenu, double submenuSize, MenuStyle submenuStyle, Color submenuColor) {
-        super(parentMenu.getParentContainer(), submenuSize, submenuStyle, submenuColor);
-        submenuItem = new FXMMenuItem(itemStyle, bgColor, labelColor, labelText, icon, tooltipText);
+    public FXMSubMenu(ItemStyle itemStyle, Color bgColor, Color labelColor, String labelText, Image itemImage, String tooltipText,
+            FXMMenu parentMenu, MenuStyle submenuStyle, Color submenuColor) {
+        super(parentMenu.getParentContainer(), parentMenu.getSize(), submenuStyle, submenuColor);
+        submenuItem = new FXMMenuItem(itemStyle, bgColor, labelColor, labelText, itemImage, tooltipText);
         submenuItem.setOnHold(null);
         submenuItem.setOnHoldReleased(null);
 
-        backItem = new FXMMenuItem(itemStyle, bgColor, labelColor, labelText, icon, tooltipText);
+        backItem = new FXMMenuItem(itemStyle, bgColor, labelColor, labelText, itemImage, tooltipText);
         backItem.setOnHold(null);
         backItem.setOnHoldReleased(null);
 
         backItem.setOnPressed(e -> {
             System.out.println("BACK!");
-            parentMenu.show(Duration.seconds(0.3));
-            close(Duration.seconds(0.3));
+            parentMenu.show();
+            close(true);
         });
 
         submenuItem.setOnPressed(e -> {
             System.out.println("SUBMENU in " + x + ", " + y);
-            parentMenu.hide(Duration.seconds(0.3));
-            open(x, y, Duration.seconds(0.3));
+            parentMenu.hide();
+            open(x, y);
         });
         addCentralItem(backItem);
     }
@@ -74,9 +73,10 @@ public class FXMSubMenu extends FXMMenu implements FXMAbstractItem {
     public Node getSubmenuNode() {
         return container;
     }
-    
+
     @Override
-        public void setActive(boolean value) {
+    public void setActive(boolean value) {
         activeValue = value;
     }
+
 }

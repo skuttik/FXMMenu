@@ -13,7 +13,6 @@ import javafx.scene.Node;
  * @author skuttik
  */
 public abstract interface FXMAbstractItem {
-//    boolean activeValue = true;
 
     abstract void init(double size, int totalNumber, int index);
 
@@ -21,8 +20,7 @@ public abstract interface FXMAbstractItem {
 
     abstract Node getNode();
 
-    public default void setActive(boolean value) {
-//        activeValue = value;
-    }
-
+    abstract void setActive(boolean value);
+    
+    abstract void close(boolean animated);
 }
