@@ -22,6 +22,9 @@ public class FXMSubMenu extends FXMMenu implements FXMAbstractItem {
     private final FXMMenuItem submenuItem;
     private double x = 0;
     private double y = 0;
+    private double offsetX;
+    private double offsetY;
+    private boolean activeValue = true;
 
     public FXMSubMenu(ItemStyle itemStyle, Color bgColor, Color labelColor, String labelText, ImageIcon icon, String tooltipText,
             FXMMenu parentMenu, double submenuSize, MenuStyle submenuStyle, Color submenuColor) {
@@ -36,35 +39,31 @@ public class FXMSubMenu extends FXMMenu implements FXMAbstractItem {
 
         backItem.setOnPressed(e -> {
             System.out.println("BACK!");
-            parentMenu.show();
-            hide(Duration.seconds(0.1));
-            submenuItem.getNode().setVisible(true);
-            backItem.getNode().setVisible(false);
+            parentMenu.show(Duration.seconds(0.3));
+            close(Duration.seconds(0.3));
         });
 
         submenuItem.setOnPressed(e -> {
             System.out.println("SUBMENU in " + x + ", " + y);
-            parentMenu.hide(Duration.seconds(0.1));
+            parentMenu.hide(Duration.seconds(0.3));
             open(x, y, Duration.seconds(0.3));
-            show();
-            backItem.getNode().setVisible(true);
-            submenuItem.getNode().setVisible(true);
         });
         addCentralItem(backItem);
     }
 
     @Override
     public void init(double size, int totalNumber, int index) {
+        double d = 2 * Math.PI / totalNumber;
+        offsetX = size * 0.62 * Math.cos(d * index - Math.PI / 2);
+        offsetY = size * 0.62 * Math.sin(d * index - Math.PI / 2);
         submenuItem.init(size, totalNumber, index);
     }
 
     @Override
     public void setMenuCenter(Group container, double x, double y) {
         submenuItem.setMenuCenter(container, x, y);
-        backItem.getNode().setLayoutX(x);
-        backItem.getNode().setLayoutY(y);
-        this.x = x;
-        this.y = y;
+        this.x = offsetX + x;
+        this.y = offsetY + y;
     }
 
     @Override
@@ -74,5 +73,10 @@ public class FXMSubMenu extends FXMMenu implements FXMAbstractItem {
 
     public Node getSubmenuNode() {
         return container;
+    }
+    
+    @Override
+        public void setActive(boolean value) {
+        activeValue = value;
     }
 }

@@ -31,6 +31,7 @@ import javax.swing.ImageIcon;
  * @author skuttik
  */
 public class FXMMenuItem implements FXMAbstractItem {
+    private boolean activeValue = true;
 
     public enum ItemStyle {
 
@@ -150,6 +151,7 @@ public class FXMMenuItem implements FXMAbstractItem {
         if (tooltipText != null) {
             tooltip = new Label(tooltipText);
             tooltip.setMouseTransparent(true);
+            tooltip.setVisible(false);
             itemGroup.getChildren().add(tooltip);
         }
 
@@ -243,41 +245,49 @@ public class FXMMenuItem implements FXMAbstractItem {
     }
 
     private void applyMousePressed(MouseEvent e) {
-        longPressTL.play();
+        if (activeValue) {
+            longPressTL.play();
+        }
         e.consume();
     }
 
     private void applyMouseOver(MouseEvent e) {
-        if (tooltip != null) {
-            tooltip.setVisible(true);
+        if (activeValue) {
+            if (tooltip != null) {
+                tooltip.setVisible(true);
+            }
         }
         e.consume();
     }
 
     private void applyMouseOff(MouseEvent e) {
-        if (tooltip != null) {
-            tooltip.setVisible(false);
+        if (activeValue) {
+            if (tooltip != null) {
+                tooltip.setVisible(false);
+            }
         }
         e.consume();
     }
 
     private void applyMouseReleased(MouseEvent e) {
-        try {
-            if (held) {
-                if (releaseHandler != null) {
-                    releaseHandler.handle(new ActionEvent(this, null));
+        if (activeValue) {
+            try {
+                if (held) {
+                    if (releaseHandler != null) {
+                        releaseHandler.handle(new ActionEvent(this, null));
+                    }
+                } else {
+                    if (pressHandler != null) {
+                        pressHandler.handle(new ActionEvent(this, null));
+                    }
                 }
-            } else {
-                if (pressHandler != null) {
-                    pressHandler.handle(new ActionEvent(this, null));
-                }
+            } catch (Exception ex) {
+                Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), ex);
             }
-        } catch (Exception ex) {
-            Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), ex);
+            longPressTL.stop();
+            new Timeline(new KeyFrame(Duration.seconds(holdingLength / 10), new KeyValue(arc.lengthProperty(), 0, Interpolator.EASE_OUT))).play();
+            held = false;
         }
-        longPressTL.stop();
-        new Timeline(new KeyFrame(Duration.seconds(holdingLength / 10), new KeyValue(arc.lengthProperty(), 0, Interpolator.EASE_OUT))).play();
-        held = false;
         e.consume();
     }
 
@@ -298,7 +308,12 @@ public class FXMMenuItem implements FXMAbstractItem {
         arc.setCenterX(offsetX + x);
         arc.setCenterY(offsetY + y);
     }
-
+   
+    @Override
+        public void setActive(boolean value) {
+        activeValue = value;
+    }
+        
     public double getHoldingLength() {
         return holdingLength;
     }
