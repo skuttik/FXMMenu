@@ -129,6 +129,12 @@ public class FXMMenuItem implements FXMAbstractItem {
             label = new Label(labelText);
             label.setTextFill(labelColor);
             label.setMouseTransparent(true);
+            label.setOnMouseEntered(e -> {
+                applyMouseOver(e);
+            });
+            label.setOnMouseExited(e -> {
+                applyMouseOff(e);
+            });
             itemGroup.getChildren().add(label);
         }
 
@@ -143,7 +149,7 @@ public class FXMMenuItem implements FXMAbstractItem {
 
         if (tooltipText != null) {
             tooltip = new Label(tooltipText);
-            tooltip.setVisible(false);
+            tooltip.setMouseTransparent(true);
             itemGroup.getChildren().add(tooltip);
         }
 
@@ -188,7 +194,6 @@ public class FXMMenuItem implements FXMAbstractItem {
 
         if (circle != null) {
             circle.setRadius(refSize);
-
         }
         if (pieSlice != null) {
             if (index == -1) {
@@ -210,7 +215,7 @@ public class FXMMenuItem implements FXMAbstractItem {
         arc.setRadiusX(refSize + size / 20);
         arc.setRadiusY(refSize + size / 20);
         arc.setStrokeWidth(size / 10);
-        arc.setBlendMode(BlendMode.SOFT_LIGHT);
+        arc.setBlendMode(BlendMode.SCREEN);
     }
 
     public ItemStyle getItemStyle() {

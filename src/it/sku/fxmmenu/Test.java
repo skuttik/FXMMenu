@@ -46,14 +46,14 @@ public class Test extends Application {
 
         Duration longPressDuration = Duration.seconds(1.0);
         Duration menuCreationDuration = Duration.seconds(0.4);
-
+        showingMenu = createMenu(root);
+        
         scene.setOnMousePressed(e -> {
+            System.out.println("bbbb");
             if (e.getButton() == MouseButton.SECONDARY) {
-                FXMMenu menu = createMenu();
-                menu.show(root, e.getSceneX(), e.getSceneY(), menuCreationDuration);
+                showingMenu.open(e.getSceneX(), e.getSceneY(), menuCreationDuration);
             } else if (e.getButton() == MouseButton.PRIMARY) {
-                showingMenu = createMenu();
-                showingMenu.delayedShow(root, longPressDuration, e.getSceneX(), e.getSceneY(), menuCreationDuration);
+                showingMenu.delayedShow(longPressDuration, e.getSceneX(), e.getSceneY(), menuCreationDuration);
             }
         });
 
@@ -65,8 +65,11 @@ public class Test extends Application {
         primaryStage.show();
     }
 
-    private FXMMenu createMenu() {
-        FXMSubMenu submenu = new FXMSubMenu(ItemStyle.CIRCULAR, Color.BLUE, Color.WHITE, "SB", null, "Submenu", 100, FXMMenu.Style.CIRCULAR, Color.BLUE);
+    private FXMMenu createMenu(Group parent) {
+        FXMMenu menu = new FXMMenu(parent, 100, FXMMenu.MenuStyle.EMPTY, new Color(0.2, 0.2, 0.2, 0.76));
+
+        FXMSubMenu submenu = new FXMSubMenu(ItemStyle.CIRCULAR, Color.BLUE, Color.WHITE, "S", null, "Submenu", menu, 100, FXMMenu.MenuStyle.EMPTY, Color.BLUE);
+
         for (int i = 0; i < 5; i++) {
             String lbl = "S" + i;
             submenu.add(new FXMMenuItem(ItemStyle.CIRCULAR, Color.BLUE, Color.WHITE, lbl, null, lbl).
@@ -75,15 +78,13 @@ public class Test extends Application {
                     setOnHoldReleased(e -> System.out.println("RELEASED " + lbl)));
         }
 
-        FXMMenu menu = new FXMMenu(100, FXMMenu.Style.EMPTY, new Color(0.2, 0.2, 0.2, 0.76));
-
         menu.addCentralItem(new FXMMenuItem(ItemStyle.CIRCULAR, Color.DIMGRAY, Color.BLACK, "X", null, "Close").
-                setOnPressed(e -> menu.hide(Duration.ZERO)));
+                setOnPressed(e -> menu.hide(Duration.seconds(0.3))));
         menu.add(new FXMMenuItem(ItemStyle.CIRCULAR, Color.RED, Color.WHITE, "Q", null, "Quit").
                 setOnPressed(e -> Platform.exit()));
         menu.add(submenu);
 
-        for (int i = 0; i < (Math.random() * 4 + 2); i++) {
+        for (int i = 0; i < 2; i++) {
             String lbl = "" + i;
             menu.add(new FXMMenuItem(ItemStyle.CIRCULAR, Color.CORAL, Color.BLACK, lbl, null, lbl).
                     setOnHold(e -> System.out.println("HOLD " + lbl)).

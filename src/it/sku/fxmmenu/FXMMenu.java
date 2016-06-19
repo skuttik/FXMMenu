@@ -24,9 +24,9 @@ import javafx.util.Duration;
  *
  * @author skuttik
  */
-public class FXMMenu extends Group {
+public class FXMMenu {
 
-    public enum Style {
+    public enum MenuStyle {
 
         EMPTY,
         CIRCULAR,
@@ -34,14 +34,15 @@ public class FXMMenu extends Group {
         POLYGONAL_BASE
     }
 
-    private Group container = null;
+    protected final Group container;
+    private final Group parentContainer;
     private Circle baseCircle = null;
     private Polygon basePolygon = null;
     double size;
     private Color color;
-    private FXMAbstractItem items[];
+    protected FXMAbstractItem items[];
     private FXMMenuItem centralItem = null;
-    private final Style baseStyle;
+    private final MenuStyle baseStyle;
     private double centerX = 0;
     private double centerY = 0;
 
@@ -49,21 +50,24 @@ public class FXMMenu extends Group {
     private Arc arc;
     private Timeline disappearTL;
 
-    public FXMMenu(double size, Style style, Color color) {
+    public FXMMenu(Group parentContainer, double size, MenuStyle style, Color color) {
         this.size = size;
         this.color = color;
         this.baseStyle = style;
+        this.container = new Group();
+//        this.container.setVisible(false);
+        this.parentContainer = parentContainer;
+        parentContainer.getChildren().add(this.container);
         create();
         arrange();
     }
 
     private void create() {
-        if (baseStyle == Style.CIRCULAR) {
+        if (baseStyle == MenuStyle.CIRCULAR) {
             baseCircle = new Circle(size, color);
             baseCircle.opacityProperty().set(1.0);
-            baseCircle.setVisible(false);
             baseCircle.setMouseTransparent(false);
-            getChildren().add(baseCircle);
+            container.getChildren().add(baseCircle);
         }
 
         arc = new Arc();
@@ -73,22 +77,29 @@ public class FXMMenu extends Group {
         arc.setStroke(Color.BEIGE);
         arc.setFill(new Color(0, 0, 0, 0));
         arc.setStartAngle(90);
+        parentContainer.getChildren().add(arc);
 
         longPressTL = null;
         disappearTL = null;
     }
 
+    public void destroy(){
+        parentContainer.getChildren().remove(container);    
+    }
+    
     public final void addCentralItem(FXMMenuItem item) {
         centralItem = item;
-        centralItem.getNode().setVisible(false);
         centralItem.init(size, -1, -1);
-        getChildren().add(centralItem.getNode());
+        container.getChildren().add(centralItem.getNode());
+    }
+
+    public Group getParentContainer() {
+        return parentContainer;
     }
 
     public final void add(FXMSubMenu submenu) {
         addItem(submenu);
-        submenu.setParentMenu(this);
-        getChildren().add(submenu);
+        submenu.getSubmenuNode().setVisible(false);
     }
 
     public final void add(FXMMenuItem item) {
@@ -96,7 +107,6 @@ public class FXMMenu extends Group {
     }
 
     private void addItem(FXMAbstractItem item) {
-        item.getNode().setVisible(false);
         if (items != null) {
             int s = items.length;
             FXMAbstractItem newItems[] = new FXMAbstractItem[s + 1];
@@ -107,6 +117,7 @@ public class FXMMenu extends Group {
             items = new FXMAbstractItem[1];
             items[0] = item;
         }
+        container.getChildren().add(item.getNode());
     }
 
     private double[] getPolygonVertices(int number, double delta) {
@@ -114,7 +125,7 @@ public class FXMMenu extends Group {
         for (int i = 0; i < number; i++) {
             double factor = 1;
             double angle = 0;
-            if (baseStyle == Style.POLYGONAL_BASE) {
+            if (baseStyle == MenuStyle.POLYGONAL_BASE) {
                 angle = delta * i - Math.PI / 2;
                 factor = 1.1;
             } else {
@@ -131,28 +142,18 @@ public class FXMMenu extends Group {
         if (items == null) {
             return;
         }
-        for (FXMAbstractItem item : items) {
-            getChildren().remove(item.getNode());
-        }
         int n = items.length;
         double d = 2 * Math.PI / n;
-        if (baseStyle == Style.POLYGONAL_CORNER || baseStyle == Style.POLYGONAL_BASE) {
-            getChildren().remove(basePolygon);
+        if (baseStyle == MenuStyle.POLYGONAL_CORNER || baseStyle == MenuStyle.POLYGONAL_BASE) {
             basePolygon = new Polygon(getPolygonVertices(n, d));
             basePolygon.opacityProperty().set(1.0);
             basePolygon.setMouseTransparent(false);
-            getChildren().add(basePolygon);
+            container.getChildren().add(basePolygon);
         }
         int idx = 0;
         for (FXMAbstractItem item : items) {
             item.init(size, n, idx);
-            item.getNode().setVisible(true);
-            getChildren().add(item.getNode());
             idx++;
-        }
-        if (centralItem != null) {
-            getChildren().remove(centralItem.getNode());
-            getChildren().add(centralItem.getNode());
         }
     }
 
@@ -172,17 +173,16 @@ public class FXMMenu extends Group {
         this.color = color;
     }
 
-    public void delayedShow(Group container, Duration delay, double x, double y, Duration duration) {
+    public void delayedShow(Duration delay, double x, double y, Duration duration) {
         arc.setLayoutX(x);
         arc.setLayoutY(y);
         arc.setRadiusX(size / 2);
         arc.setRadiusY(size / 2);
         arc.setStrokeWidth(size / 10);
-        arc.setBlendMode(BlendMode.SOFT_LIGHT);
-        getChildren().add(arc);
+        arc.setBlendMode(BlendMode.SCREEN);
 
         disappearTL = new Timeline(new KeyFrame(duration.multiply(1.2), new KeyValue(arc.opacityProperty(), 0.0, Interpolator.EASE_BOTH)));
-        disappearTL.setOnFinished(e -> getChildren().remove(arc));
+        disappearTL.setOnFinished(e -> parentContainer.getChildren().remove(arc));
 
         arc.opacityProperty().setValue(0.0);
         longPressTL = new Timeline(
@@ -192,7 +192,7 @@ public class FXMMenu extends Group {
         );
         longPressTL.setOnFinished(e -> {
             disappearTL.play();
-            show(container, x, y, duration);
+            open(x, y, duration);
         });
         longPressTL.play();
     }
@@ -207,34 +207,14 @@ public class FXMMenu extends Group {
     }
 
     public void hide(Duration duration) {
-        Shape base = null;
-        switch (baseStyle) {
-            case CIRCULAR:
-                if (baseCircle != null) {
-                    base = baseCircle;
-                }
-                break;
-            case POLYGONAL_BASE:
-            case POLYGONAL_CORNER:
-                if (basePolygon != null) {
-                    base = basePolygon;
-                }
-                break;
-        }
-        if (base != null) {
-            base.setVisible(false);
-        }
-        centralItem.getNode().setVisible(false);
-        for (FXMAbstractItem item : items) {
-            item.getNode().setVisible(false);
-        }
+        container.setVisible(false);
     }
 
-    public void show(Group container, double x, double y, Duration duration) {
-        if (this.container == null) {
-            this.container = container;
-            container.getChildren().add(this);
-        }
+    void show() {
+        container.setVisible(true);
+    }
+
+    public void open(double x, double y, Duration duration) {
         centerX = x;
         centerY = y;
 
@@ -244,7 +224,6 @@ public class FXMMenu extends Group {
                 if (baseCircle != null) {
                     baseCircle.setCenterX(x);
                     baseCircle.setCenterY(y);
-                    baseCircle.setVisible(true);
                     base = baseCircle;
                 }
                 break;
@@ -252,17 +231,11 @@ public class FXMMenu extends Group {
             case POLYGONAL_CORNER:
                 if (basePolygon != null) {
                     basePolygon.setOnMouseClicked(null);
-                    basePolygon.setVisible(true);
                     base = basePolygon;
                 }
                 break;
         }
         arrange();
-
-        centralItem.getNode().setVisible(true);
-        for (FXMAbstractItem item : items) {
-            item.getNode().setVisible(true);
-        }
 
         int index = 0;
         double wt = duration.toSeconds() / (items.length + 1);
@@ -276,7 +249,7 @@ public class FXMMenu extends Group {
 
         index++;
         for (FXMAbstractItem item : items) {
-            item.setMenuCenter(this, x, y);
+            item.setMenuCenter(container, x, y);
             item.getNode().setOpacity(0);
             new Timeline(new KeyFrame(Duration.seconds(wt * index), new KeyValue(item.getNode().opacityProperty(), 0.0, Interpolator.DISCRETE)),
                     new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(item.getNode().opacityProperty(), 1.0, Interpolator.EASE_IN)))
@@ -284,7 +257,7 @@ public class FXMMenu extends Group {
             index++;
         }
         if (centralItem != null) {
-            centralItem.setMenuCenter(this, x, y);
+            centralItem.setMenuCenter(container, x, y);
             centralItem.getNode().setOpacity(0);
             new Timeline(new KeyFrame(Duration.seconds(wt * index), new KeyValue(centralItem.getNode().opacityProperty(), 0.0, Interpolator.DISCRETE)),
                     new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(centralItem.getNode().opacityProperty(), 1.0, Interpolator.EASE_IN)))
