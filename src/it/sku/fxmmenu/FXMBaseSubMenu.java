@@ -5,57 +5,55 @@
  */
 package it.sku.fxmmenu;
 
-import it.sku.fxmmenu.FXMMenuItem.ItemStyle;
+import it.sku.fxmmenu.internal.FXMAbstractItem;
+import it.sku.fxmmenu.internal.FXMBaseMenuItem;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 /**
  *
  * @author skuttik
  */
-public class FXMSubMenu extends FXMMenu implements FXMAbstractItem {
+public class FXMBaseSubMenu extends FXMMenu implements FXMAbstractItem {
 
-    private final FXMMenuItem backItem;
-    private final FXMMenuItem submenuItem;
+    private FXMBaseMenuItem backItem;
+    private FXMBaseMenuItem submenuItem;
     private double x = 0;
     private double y = 0;
     private double offsetX;
     private double offsetY;
     private boolean activeValue = true;
+    private final FXMMenu parentMenu;
 
-    public FXMSubMenu(ItemStyle itemStyle, Color bgColor, Color labelColor, String labelText, Image itemImage, String tooltipText,
-            FXMMenu parentMenu, MenuStyle submenuStyle, Color submenuColor) {
+    public FXMBaseSubMenu(FXMMenu parentMenu, FillingStyle submenuStyle, Color submenuColor) {
         super(parentMenu.getParentContainer(), parentMenu.getSize(), submenuStyle, submenuColor);
-        submenuItem = new FXMMenuItem(itemStyle, bgColor, labelColor, labelText, itemImage, tooltipText);
-        submenuItem.setOnHold(null);
-        submenuItem.setOnHoldReleased(null);
+        this.parentMenu = parentMenu;
+    }
 
-        backItem = new FXMMenuItem(itemStyle, bgColor, labelColor, labelText, itemImage, tooltipText);
-        backItem.setOnHold(null);
-        backItem.setOnHoldReleased(null);
-
-        backItem.setOnPressed(e -> {
+    protected void setItems(FXMBaseMenuItem submenuItem, FXMBaseMenuItem backItem) {
+        this.backItem = backItem;
+        this.backItem.setOnPressed(e -> {
             System.out.println("BACK!");
             parentMenu.show();
             close(true);
         });
+        addCentralItem(backItem);
 
-        submenuItem.setOnPressed(e -> {
+        this.submenuItem = submenuItem;
+        this.submenuItem.setOnPressed(e -> {
             System.out.println("SUBMENU in " + x + ", " + y);
             parentMenu.hide();
             open(x, y);
         });
-        addCentralItem(backItem);
     }
 
     @Override
-    public void init(double size, int totalNumber, int index) {
+    public void arrange(double size, int totalNumber, int index) {
         double d = 2 * Math.PI / totalNumber;
         offsetX = size * 0.62 * Math.cos(d * index - Math.PI / 2);
         offsetY = size * 0.62 * Math.sin(d * index - Math.PI / 2);
-        submenuItem.init(size, totalNumber, index);
+        submenuItem.arrange(size, totalNumber, index);
     }
 
     @Override
