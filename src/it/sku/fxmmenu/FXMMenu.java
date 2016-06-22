@@ -322,9 +322,9 @@ public class FXMMenu {
         }
         for (FXMAbstractItem item : items) {
             item.setMenuCenter(container, x, y);
-//            new Timeline(new KeyFrame(Duration.seconds(wt * index), new KeyValue(item.getNode().opacityProperty(), 0.0, Interpolator.DISCRETE)),
-//                    new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(item.getNode().opacityProperty(), 1.0, Interpolator.EASE_IN)))
-//                    .play();
+            new Timeline(new KeyFrame(Duration.seconds(wt * index), new KeyValue(item.getNode().opacityProperty(), 0.0, Interpolator.DISCRETE)),
+                    new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(item.getNode().opacityProperty(), 1.0, Interpolator.EASE_IN)))
+                    .play();
             item.getNode().setOpacity(1.0);
             index++;
         }
@@ -335,6 +335,7 @@ public class FXMMenu {
                     new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(centralItem.getNode().opacityProperty(), 1.0, Interpolator.EASE_IN)))
                     .play();
         }
+        setItemsActive(true);
         openState = true;
     }
 

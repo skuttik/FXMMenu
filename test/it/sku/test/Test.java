@@ -28,8 +28,8 @@ import javafx.stage.StageStyle;
 //     right mouse button is pressed 
 //     or for long press of the left button
 //
-// The menu has circular shapes with a random number of menu items (doing nothing) 
-// and a central item for exiting test application
+// createMenuCircular: The menu has circular shapes with a random number of menu items (doing nothing) 
+//                     and a central item for exiting test application
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -49,8 +49,8 @@ public class Test extends Application {
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
 
-//        showingMenu = createMenuIcons(root);
-        showingMenu = createMenu(root);
+        showingMenu = createMenuPie(root);
+//        showingMenu = createMenuCircular(root);
 
         scene.setOnMousePressed(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
@@ -68,7 +68,7 @@ public class Test extends Application {
         primaryStage.show();
     }
 
-    private FXMMenu createMenu(Group parent) {
+    private FXMMenu createMenuCircular(Group parent) {
 
         FXMMenu menu = new FXMMenu(parent, 70, FXMMenu.FillingStyle.EMPTY, new Color(0.5, 0.5, 0.5, 0.65));
 
@@ -105,7 +105,7 @@ public class Test extends Application {
         return menu;
     }
 
-    private FXMMenu createMenuIcons(Group parent) {
+    private FXMMenu createMenuPie(Group parent) {
 
         ///////// Icon images  ///////////////////////
         Image btnCloseImage = new Image(Test.class.getResource("resources/closeT.png").toExternalForm());
@@ -118,15 +118,17 @@ public class Test extends Application {
         Image btnStreetsImage = new Image(Test.class.getResource("resources/streetsT.png").toExternalForm());
         /////////////////////////////////////////////
 
-        FXMMenu menu = new FXMMenu(parent, 65, FXMMenu.FillingStyle.CIRCULAR, new Color(0.5, 0.5, 0.5, 0.65));
+        Color gcol = new Color(0.5, 0.5, 0.5, 0.65);
+        
+        FXMMenu menu = new FXMMenu(parent, 65, FXMMenu.FillingStyle.CIRCULAR, gcol);
 
         ////// SUBMENU ///////////////////////////////
-        FXMBaseSubMenu submenu = new FXMPieSliceSubMenu(Color.CADETBLUE, Color.WHITE, "", btnConfigImage, "Config", menu,
+        FXMBaseSubMenu submenu = new FXMPieSliceSubMenu(Color.DIMGRAY, Color.WHITE, "", btnConfigImage, "Config", menu,
                 FXMMenu.FillingStyle.CIRCULAR, Color.CADETBLUE.deriveColor(1.0, 1.0, 1.0, 0.4));
 
-        submenu.add(new FXMPieSliceItem(Color.CADETBLUE.darker(), Color.WHITE, "", btnStreetsImage, "Streets on"));
-        submenu.add(new FXMPieSliceItem(Color.CADETBLUE.darker(), Color.WHITE, "", btnPencilImage, "Set parameters"));
-        submenu.add(new FXMPieSliceItem(Color.CADETBLUE.darker(), Color.WHITE, "", btnRubberImage, "Reset parameters"));
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnStreetsImage, "Streets on"));
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnPencilImage, "Set parameters"));
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnRubberImage, "Reset parameters"));
         ///////////////////////////////////////////////
 
         menu.addCentralItem(new FXMCircularItem(Color.DIMGRAY, Color.BLACK, "", btnCloseImage, "Close").
@@ -137,17 +139,17 @@ public class Test extends Application {
 
         menu.add(submenu);
 
-        menu.add(new FXMPieSliceItem(Color.CORAL, Color.BLACK, null, btnSelectionImage, "Item selection").
+        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnSelectionImage, "Item selection").
                 setOnHold(e -> System.out.println("HOLD Item selection")).
                 setOnPressed(e -> System.out.println("PRESSED Item selection")).
                 setOnHoldReleased(e -> System.out.println("RELEASED Item selection")));
 
-        menu.add(new FXMPieSliceItem(Color.CORAL, Color.BLACK, null, btnSpotImage, "Spotlight").
+        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnSpotImage, "Spotlight").
                 setOnHold(e -> System.out.println("HOLD Spotlight")).
                 setOnPressed(e -> System.out.println("PRESSED Spotlight")).
                 setOnHoldReleased(e -> System.out.println("RELEASED Spotlight")));
 
-        menu.add(new FXMPieSliceItem(Color.CORAL, Color.BLACK, null, btnTrackingImage, "Tracking").
+        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnTrackingImage, "Tracking").
                 setOnHold(e -> System.out.println("HOLD Tracking")).
                 setOnPressed(e -> System.out.println("PRESSED Tracking")).
                 setOnHoldReleased(e -> System.out.println("RELEASED Tracking")));

@@ -210,7 +210,7 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
     }
 
     protected final void applyMousePressed(MouseEvent e) {
-        if (activeValue) {
+        if (activeValue && holdHandler != null) {
             longPressTL.play();
         }
         e.consume();

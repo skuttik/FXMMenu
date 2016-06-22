@@ -21,7 +21,7 @@ public class FXMPieSliceSubMenu extends FXMBaseSubMenu{
         submenuItem.setOnHold(null);
         submenuItem.setOnHoldReleased(null);
 
-        FXMBaseMenuItem backItem = new FXMPieSliceItem(bgColor, labelColor, labelText, itemImage, tooltipText);
+        FXMBaseMenuItem backItem = new FXMCircularItem(bgColor, labelColor, labelText, itemImage, tooltipText);
         backItem.setOnHold(null);
         backItem.setOnHoldReleased(null);
         
