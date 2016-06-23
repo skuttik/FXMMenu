@@ -6,6 +6,7 @@
 package it.sku.fxmmenu;
 
 import it.sku.fxmmenu.internal.FXMBaseMenuItem;
+import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
@@ -13,7 +14,7 @@ import javafx.scene.paint.Color;
  *
  * @author skuttik
  */
-public class FXMPieSliceSubMenu extends FXMBaseSubMenu {
+public final class FXMPieSliceSubMenu extends FXMBaseSubMenu {
 
     public FXMPieSliceSubMenu(Color bgColor, Color labelColor, String labelText, Image itemImage, String tooltipText, FXMMenu parentMenu, FillingStyle submenuStyle, Color submenuColor) {
         super(parentMenu, submenuStyle, submenuColor);
@@ -25,6 +26,14 @@ public class FXMPieSliceSubMenu extends FXMBaseSubMenu {
         backItem.setOnHold(null);
         backItem.setOnHoldReleased(null);
 
-        setItems(submenuItem, backItem);
+        setBaseItems(submenuItem, backItem);
+    }
+
+    @Override
+    public void setMenuCenter(Group container, double x, double y) {
+        submenuItem.setMenuCenter(container, x, y);
+        backItem.setMenuCenter(container, x, y);
+        this.x = x;
+        this.y = y;
     }
 }

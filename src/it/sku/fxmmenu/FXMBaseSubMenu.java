@@ -15,23 +15,24 @@ import javafx.scene.paint.Color;
  *
  * @author skuttik
  */
-public class FXMBaseSubMenu extends FXMMenu implements FXMAbstractItem {
+public abstract class FXMBaseSubMenu extends FXMMenu implements FXMAbstractItem {
 
-    private FXMBaseMenuItem backItem;
-    private FXMBaseMenuItem submenuItem;
-    private double x = 0;
-    private double y = 0;
-    private double offsetX;
-    private double offsetY;
-    private boolean activeValue = true;
+    protected FXMBaseMenuItem backItem;
+    protected FXMBaseMenuItem submenuItem;
+    protected double x = 0;
+    protected double y = 0;
+    protected double offsetX;
+    protected double offsetY;
+    protected boolean activeValue = true;
     private final FXMMenu parentMenu;
 
     public FXMBaseSubMenu(FXMMenu parentMenu, FillingStyle submenuStyle, Color submenuColor) {
         super(parentMenu.getParentContainer(), parentMenu.getSize(), submenuStyle, submenuColor);
         this.parentMenu = parentMenu;
+        super.menuLevel = parentMenu.menuLevel + 1;
     }
 
-    protected void setItems(FXMBaseMenuItem submenuItem, FXMBaseMenuItem backItem) {
+    protected void setBaseItems(FXMBaseMenuItem submenuItem, FXMBaseMenuItem backItem) {
         this.backItem = backItem;
         this.backItem.setOnPressed(e -> {
             parentMenu.show();
@@ -52,13 +53,6 @@ public class FXMBaseSubMenu extends FXMMenu implements FXMAbstractItem {
         offsetX = size * 0.62 * Math.cos(d * index - Math.PI / 2);
         offsetY = size * 0.62 * Math.sin(d * index - Math.PI / 2);
         submenuItem.arrange(size, totalNumber, index);
-    }
-
-    @Override
-    public void setMenuCenter(Group container, double x, double y) {
-        submenuItem.setMenuCenter(container, x, y);
-        this.x = offsetX + x;
-        this.y = offsetY + y;
     }
 
     @Override

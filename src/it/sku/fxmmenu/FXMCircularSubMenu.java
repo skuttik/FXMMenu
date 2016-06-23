@@ -6,6 +6,7 @@
 package it.sku.fxmmenu;
 
 import it.sku.fxmmenu.internal.FXMBaseMenuItem;
+import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
@@ -13,7 +14,7 @@ import javafx.scene.paint.Color;
  *
  * @author skuttik
  */
-public class FXMCircularSubMenu extends FXMBaseSubMenu {
+public final class FXMCircularSubMenu extends FXMBaseSubMenu {
 
     public FXMCircularSubMenu(Color bgColor, Color labelColor, String labelText, Image itemImage, FXMMenu parentMenu, FillingStyle submenuStyle, Color submenuColor) {
         super(parentMenu, submenuStyle, submenuColor);
@@ -27,6 +28,13 @@ public class FXMCircularSubMenu extends FXMBaseSubMenu {
         backItem.setOnHoldReleased(null);
         backItem.setParentMenu(parentMenu);
 
-        setItems(submenuItem, backItem);
+        setBaseItems(submenuItem, backItem);
+    }
+
+    @Override
+    public void setMenuCenter(Group container, double x, double y) {
+        submenuItem.setMenuCenter(container, x, y);
+        this.x = offsetX + x;
+        this.y = offsetY + y;
     }
 }

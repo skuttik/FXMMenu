@@ -22,7 +22,7 @@ public class FXMCircularItem extends FXMBaseMenuItem {
 
     public FXMCircularItem(Color bgColor, Color labelColor, String labelText, Image itemImage) {
         super(labelColor, labelText, itemImage);
-        
+
         circle = new Circle(10, bgColor);
         circle.setMouseTransparent(false);
         circle.setOnMouseReleased(e -> {
@@ -52,13 +52,11 @@ public class FXMCircularItem extends FXMBaseMenuItem {
     @Override
     public void setMenuCenter(Group container, double x, double y) {
         super.setMenuCenter(x, y);
-        circle.setCenterX(getOffsetX() + x);
-        circle.setCenterY(getOffsetY() + y);
     }
 
     @Override
     public void arrange(double size, int totalNumber, int index) {
-        baseArrange(size, totalNumber, index);
+        baseArrange(size, totalNumber, index, SubLevelMode.FOLLOW_ITEM);
         circle.setRadius(getRefSize());
     }
 }

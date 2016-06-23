@@ -57,10 +57,11 @@ public class FXMMenu {
     private Timeline disappearTL;
     private Timeline abortTL;
     private Label tooltip;
+    protected int menuLevel = 0;
 
     private DoubleProperty tooltipPositionOffset = new SimpleDoubleProperty(0);
 
-    private double hiddenOpacity = 0.25;
+    private double hiddenOpacity = 0.15;
     private Duration delay = Duration.seconds(1);
     private Duration inDuration = Duration.seconds(0.3);
     private Duration outDuration = Duration.seconds(0.3);
@@ -118,8 +119,13 @@ public class FXMMenu {
         container.getChildren().add(tooltip);
     }
 
-    public void setTooltipStyle(String Style) {
-        tooltip.setStyle(Style);
+    public void setTooltipStyle(String style) {
+        tooltip.setStyle(style);
+        for (FXMAbstractItem item : items) {
+            if (item instanceof FXMBaseSubMenu) {
+                ((FXMBaseSubMenu) item).setTooltipStyle(style);
+            }
+        }
     }
 
     public void destroy() {
@@ -133,13 +139,14 @@ public class FXMMenu {
         arrange();
     }
 
-    public final void add(FXMBaseSubMenu submenu) {
+    public void add(FXMBaseSubMenu submenu) {
         addItem(submenu);
         submenu.getSubmenuNode().setVisible(false);
     }
 
-    public final void add(FXMBaseMenuItem item) {
+    public void add(FXMBaseMenuItem item) {
         item.setParentMenu(this);
+        item.setMenuLevel(menuLevel);
         addItem(item);
     }
 
@@ -359,13 +366,12 @@ public class FXMMenu {
                     .play();
         }
 
-        tooltip.setLayoutY(y + size);
-
         setItemsActive(true);
         openState = true;
     }
 
-    public void showTooltip(String text) {
+    public void showTooltip(String text, double tooltipFactor) {
+        tooltip.setLayoutY(centerY + size * tooltipFactor);
         tooltip.setText(text);
         tooltip.setVisible(true);
     }
@@ -378,8 +384,6 @@ public class FXMMenu {
     public void bindItems() {
         tooltipPositionOffset.bind(tooltip.widthProperty().divide(2));
         tooltip.layoutXProperty().bind(tooltipPositionOffset.multiply(-1).add(centerX));
-
-        tooltip.layoutXProperty().addListener((o, ov, nv) -> System.out.println(nv));
     }
 
     public void hideTooltip() {

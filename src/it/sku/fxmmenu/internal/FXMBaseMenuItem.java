@@ -34,13 +34,17 @@ import javafx.util.Duration;
  */
 abstract public class FXMBaseMenuItem implements FXMAbstractItem {
 
-    private boolean activeValue = true;
+    public enum SubLevelMode {
 
+        ENLARGE_FROM_CENTER,
+        FOLLOW_ITEM
+    }
+    private boolean activeValue = true;
     private final Group itemGroup;
-    private Label label = null;
+    protected Label label = null;
     private final Arc arc;
-    private double offsetX;
-    private double offsetY;
+    protected double offsetX;
+    protected double offsetY;
     private double refSize;
     private boolean held;
     private Duration holdingLength;
@@ -51,6 +55,8 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
     private final ImageView icon;
     private String tooltipText = null;
     private FXMMenu parentMenu = null;
+    protected int menuLevel;
+    protected double tooltipFactor = 1;
 
     public FXMBaseMenuItem(Color labelColor, String labelText, Image itemImage) {
         holdingLength = Duration.seconds(1.0);
@@ -150,19 +156,27 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
         }
     }
 
-    protected void baseArrange(double size, int totalNumber, int index) {
+    protected void baseArrange(double size, int totalNumber, int index, SubLevelMode mode) {
         refSize = size * .25;
         double d = 2 * Math.PI / totalNumber;
+
         if (index == -1) {
             offsetX = 0;
             offsetY = 0;
         } else {
-            offsetX = size * 0.62 * Math.cos(d * index - Math.PI / 2);
-            offsetY = size * 0.62 * Math.sin(d * index - Math.PI / 2);
+            if (mode == SubLevelMode.ENLARGE_FROM_CENTER) {
+                offsetX = size * (menuLevel + 1) * 0.62 * Math.cos(d * index - Math.PI / 2);
+                offsetY = size * (menuLevel + 1) * 0.62 * Math.sin(d * index - Math.PI / 2);
+            } else {
+                offsetX = size * 0.62 * Math.cos(d * index - Math.PI / 2);
+                offsetY = size * 0.62 * Math.sin(d * index - Math.PI / 2);
+            }
         }
 
         if (label != null) {
             label.setFont(new Font(refSize));
+            label.setLayoutX(-refSize * .3);
+            label.setLayoutY(-refSize * .74);
         }
 
         if (icon != null) {
@@ -171,12 +185,16 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
 
             icon.setScaleX(scaleFactorX);
             icon.setScaleY(scaleFactorY);
+            icon.setX(-icon.getImage().getWidth() / 2);
+            icon.setY(-icon.getImage().getHeight() / 2);
         }
 
-        arc.setRadiusX(refSize + size / 20);
-        arc.setRadiusY(refSize + size / 20);
-        arc.setStrokeWidth(size / 10);
+        arc.setRadiusX(refSize * 1.1);
+        arc.setRadiusY(refSize * 1.1);
+        arc.setStrokeWidth(refSize * 0.25);
         arc.setBlendMode(BlendMode.SCREEN);
+        arc.setCenterX(0);
+        arc.setCenterY(0);
     }
 
     protected double getOffsetX() {
@@ -209,7 +227,7 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
 
     protected final void applyMouseOver(MouseEvent e) {
         if (activeValue && tooltipText != null && parentMenu != null) {
-            parentMenu.showTooltip(tooltipText);
+            parentMenu.showTooltip(tooltipText, tooltipFactor);
         }
         e.consume();
     }
@@ -244,16 +262,8 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
     }
 
     protected void setMenuCenter(double x, double y) {
-        if (label != null) {
-            label.setLayoutX(offsetX + x - refSize * .3);
-            label.setLayoutY(offsetY + y - refSize * .74);
-        }
-        if (icon != null) {
-            icon.setX(offsetX + x - icon.getImage().getWidth() / 2);
-            icon.setY(offsetY + y - icon.getImage().getHeight() / 2);
-        }
-        arc.setCenterX(offsetX + x);
-        arc.setCenterY(offsetY + y);
+        itemGroup.setLayoutX(offsetX + x);
+        itemGroup.setLayoutY(offsetY + y);
     }
 
     @Override
@@ -290,5 +300,9 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
 
     public void setParentMenu(FXMMenu parentMenu) {
         this.parentMenu = parentMenu;
+    }
+
+    public void setMenuLevel(int menuLevel) {
+        this.menuLevel = menuLevel;
     }
 }

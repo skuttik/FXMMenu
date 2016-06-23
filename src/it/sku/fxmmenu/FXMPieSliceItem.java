@@ -27,9 +27,9 @@ public class FXMPieSliceItem extends FXMBaseMenuItem {
         pieSlice = new Arc();
         pieSlice.setMouseTransparent(false);
         pieSlice.setType(ArcType.OPEN);
+        pieSlice.setFill(Color.TRANSPARENT);
         pieSlice.setStrokeLineCap(StrokeLineCap.BUTT);
         pieSlice.setStroke(bgColor);
-        //pieSlice.setFill(new Color(0.0, 0.0, 0.0, 1.0));
         pieSlice.setOnMouseReleased(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
                 applyMouseReleased(e);
@@ -57,8 +57,8 @@ public class FXMPieSliceItem extends FXMBaseMenuItem {
     @Override
     public void setMenuCenter(Group container, double x, double y) {
         super.setMenuCenter(x, y);
-        pieSlice.setCenterX(x);
-        pieSlice.setCenterY(y);
+        pieSlice.setCenterX(-offsetX);
+        pieSlice.setCenterY(-offsetY);
     }
 
     @Override
@@ -66,13 +66,19 @@ public class FXMPieSliceItem extends FXMBaseMenuItem {
         if (index == -1) {
             System.err.println(this.getClass() + ": ERROR - central item cannot be PIE");
         } else {
-            double sliceLen = 360 / totalNumber - totalNumber * 0.5;
+            double sliceLen = (360 - 2 * totalNumber) / totalNumber;
             pieSlice.setLength(sliceLen);
             pieSlice.setStartAngle(90 - sliceLen / 2 - 360 / totalNumber * index);
             pieSlice.setStrokeWidth(size * 0.66);
-            pieSlice.setRadiusX(size * 0.66);
-            pieSlice.setRadiusY(size * 0.66);
+            pieSlice.setRadiusX(size * (menuLevel + 1) * 0.66);
+            pieSlice.setRadiusY(size * (menuLevel + 1) * 0.66);
         }
-        baseArrange(size, totalNumber, index);
+        baseArrange(size, totalNumber, index, SubLevelMode.ENLARGE_FROM_CENTER);
+    }
+
+    @Override
+    public void setMenuLevel(int menuLevel) {
+        this.menuLevel = menuLevel;
+        tooltipFactor = 1 + menuLevel * 0.66;
     }
 }

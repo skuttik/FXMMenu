@@ -9,7 +9,6 @@ import it.sku.fxmmenu.FXMMenu;
 import it.sku.fxmmenu.FXMBaseSubMenu;
 import it.sku.fxmmenu.FXMCircularItem;
 import it.sku.fxmmenu.FXMCircularSubMenu;
-import it.sku.fxmmenu.FXMMenu.FillingStyle;
 import it.sku.fxmmenu.FXMPieSliceItem;
 import it.sku.fxmmenu.FXMPieSliceSubMenu;
 import javafx.application.Application;
@@ -50,12 +49,12 @@ public class Test extends Application {
         primaryStage.setScene(scene);
         primaryStage.initStyle(StageStyle.TRANSPARENT);
 
-        showingMenu = createMenuPie(root);
-//        showingMenu = createMenuCircular(root);
+        FXMMenu pieMenu = createMenuPie(root, 45);
+        showingMenu = createMenuCircular(root, 50);
 
         scene.setOnMousePressed(e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
-                showingMenu.open(e.getSceneX(), e.getSceneY());
+                pieMenu.open(e.getSceneX(), e.getSceneY());
             } else if (e.getButton() == MouseButton.PRIMARY) {
                 showingMenu.delayedShow(e.getSceneX(), e.getSceneY());
             }
@@ -69,15 +68,24 @@ public class Test extends Application {
         primaryStage.show();
     }
 
-    private FXMMenu createMenuCircular(Group parent) {
+    private FXMMenu createMenuCircular(Group parent, double size) {
 
-        FXMMenu menu = new FXMMenu(parent, 70, FXMMenu.FillingStyle.EMPTY, new Color(0.5, 0.5, 0.5, 0.65));
+        FXMMenu menu = new FXMMenu(parent, size, FXMMenu.FillingStyle.EMPTY, new Color(0.5, 0.5, 0.5, 0.65));
 
         ////// SUBMENU ///////////////////////////////
+
         FXMBaseSubMenu submenu = new FXMCircularSubMenu(Color.CADETBLUE, Color.WHITE, "S", null, menu,
                 FXMMenu.FillingStyle.CIRCULAR, Color.CADETBLUE.deriveColor(1.0, 1.0, 1.0, 0.4))
-                .setTooltipText("Submenu")
+                .setBackTooltipText("Back")
+                .setTooltipText("Submenu");
+
+        FXMBaseSubMenu subsubmenu = new FXMCircularSubMenu(Color.CADETBLUE, Color.WHITE, "T", null, submenu,
+                FXMMenu.FillingStyle.CIRCULAR, Color.CADETBLUE.deriveColor(1.0, 1.0, 1.0, 0.4))
+                .setTooltipText("SubSubmenu")
                 .setBackTooltipText("Back");
+        subsubmenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "K", null));
+        subsubmenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "L", null));
+        subsubmenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "M", null));
 
         submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "A", null)
                 .setTooltipText("function S - A")
@@ -94,6 +102,7 @@ public class Test extends Application {
         submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "E", null)
                 .setTooltipText("function S - E")
                 .setOnPressed(e -> System.out.println("S-E")));
+        submenu.add(subsubmenu);
         ///////////////////////////////////////////////
 
         menu.addCentralItem(new FXMCircularItem(Color.DIMGRAY, Color.BLACK, "X", null)
@@ -116,7 +125,7 @@ public class Test extends Application {
         return menu;
     }
 
-    private FXMMenu createMenuPie(Group parent) {
+    private FXMMenu createMenuPie(Group parent, double size) {
 
         ///////// Icon images  ///////////////////////
         Image btnCloseImage = new Image(Test.class.getResource("resources/closeT.png").toExternalForm());
@@ -131,25 +140,25 @@ public class Test extends Application {
 
         Color gcol = new Color(0.5, 0.5, 0.5, 0.65);
 
-        FXMMenu menu = new FXMMenu(parent, 50, FXMMenu.FillingStyle.CIRCULAR, gcol);
+        FXMMenu menu = new FXMMenu(parent, size, FXMMenu.FillingStyle.EMPTY, gcol);
 
         ////// SUBMENU ///////////////////////////////
-        FXMBaseSubMenu submenu = new FXMPieSliceSubMenu(Color.DIMGRAY, Color.WHITE, "", btnConfigImage, "Config", menu,
-                FXMMenu.FillingStyle.CIRCULAR, Color.CADETBLUE.deriveColor(1.0, 1.0, 1.0, 0.4));
+        FXMBaseSubMenu submenu = new FXMPieSliceSubMenu(Color.DIMGRAY, Color.WHITE, null, btnConfigImage, "Config", menu,
+                FXMMenu.FillingStyle.EMPTY, Color.CADETBLUE.deriveColor(1.0, 1.0, 1.0, 0.4));
 
-        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnStreetsImage)
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, null, btnStreetsImage)
                 .setTooltipText("Streets on"));
-        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnPencilImage)
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, null, btnPencilImage)
                 .setTooltipText("Set parameters"));
-        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnRubberImage)
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, null, btnRubberImage)
                 .setTooltipText("Reset parameters"));
         ///////////////////////////////////////////////
 
-        menu.addCentralItem(new FXMCircularItem(Color.DIMGRAY, Color.BLACK, "", btnCloseImage)
+        menu.addCentralItem(new FXMCircularItem(Color.DIMGRAY, Color.BLACK, null, btnCloseImage)
                 .setTooltipText("Close")
                 .setOnPressed(e -> menu.close(true)));
 
-        menu.add(new FXMPieSliceItem(Color.RED, Color.WHITE, "", btnCloseImage)
+        menu.add(new FXMPieSliceItem(Color.RED, Color.WHITE, null, btnCloseImage)
                 .setTooltipText("Quit")
                 .setOnPressed(e -> Platform.exit()));
 
