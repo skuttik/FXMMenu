@@ -11,7 +11,10 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Arc;
@@ -20,6 +23,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 /**
@@ -52,6 +56,9 @@ public class FXMMenu {
     private Arc arc;
     private Timeline disappearTL;
     private Timeline abortTL;
+    private Label tooltip;
+
+    private DoubleProperty tooltipPositionOffset = new SimpleDoubleProperty(0);
 
     private double hiddenOpacity = 0.25;
     private Duration delay = Duration.seconds(1);
@@ -101,6 +108,18 @@ public class FXMMenu {
                 new KeyFrame(Duration.seconds(0.3), new KeyValue(arc.opacityProperty(), 0.0, Interpolator.LINEAR)),
                 new KeyFrame(Duration.seconds(0.3), new KeyValue(arc.lengthProperty(), 0.0, Interpolator.LINEAR))
         );
+
+        tooltip = new Label();
+        tooltip.setMouseTransparent(true);
+        tooltip.setVisible(false);
+        tooltip.setTextAlignment(TextAlignment.CENTER);
+        tooltip.setStyle("-fx-font-size: 14px; -fx-text-fill: wheat;");
+        tooltip.setBlendMode(BlendMode.ADD);
+        container.getChildren().add(tooltip);
+    }
+
+    public void setTooltipStyle(String Style) {
+        tooltip.setStyle(Style);
     }
 
     public void destroy() {
@@ -120,6 +139,7 @@ public class FXMMenu {
     }
 
     public final void add(FXMBaseMenuItem item) {
+        item.setParentMenu(this);
         addItem(item);
     }
 
@@ -246,6 +266,7 @@ public class FXMMenu {
             tl.play();
         }
         openState = false;
+        unbindItems();
     }
 
     void hide() {
@@ -287,6 +308,7 @@ public class FXMMenu {
         container.setVisible(true);
         centerX = x;
         centerY = y;
+        bindItems();
 
         Shape base = null;
         switch (baseStyle) {
@@ -328,6 +350,7 @@ public class FXMMenu {
             item.getNode().setOpacity(1.0);
             index++;
         }
+
         if (centralItem != null) {
             centralItem.setMenuCenter(container, x, y);
             centralItem.getNode().setOpacity(0);
@@ -335,8 +358,31 @@ public class FXMMenu {
                     new KeyFrame(Duration.seconds(wt * index + at), new KeyValue(centralItem.getNode().opacityProperty(), 1.0, Interpolator.EASE_IN)))
                     .play();
         }
+
+        tooltip.setLayoutY(y + size);
+
         setItemsActive(true);
         openState = true;
     }
 
+    public void showTooltip(String text) {
+        tooltip.setText(text);
+        tooltip.setVisible(true);
+    }
+
+    public void unbindItems() {
+        tooltipPositionOffset.unbind();
+        tooltip.layoutXProperty().unbind();
+    }
+
+    public void bindItems() {
+        tooltipPositionOffset.bind(tooltip.widthProperty().divide(2));
+        tooltip.layoutXProperty().bind(tooltipPositionOffset.multiply(-1).add(centerX));
+
+        tooltip.layoutXProperty().addListener((o, ov, nv) -> System.out.println(nv));
+    }
+
+    public void hideTooltip() {
+        tooltip.setVisible(false);
+    }
 }

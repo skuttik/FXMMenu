@@ -20,8 +20,9 @@ public class FXMCircularItem extends FXMBaseMenuItem {
 
     private final Circle circle;
 
-    public FXMCircularItem(Color bgColor, Color labelColor, String labelText, Image itemImage, String tooltipText) {
-        super(labelColor, labelText, itemImage, tooltipText);
+    public FXMCircularItem(Color bgColor, Color labelColor, String labelText, Image itemImage) {
+        super(labelColor, labelText, itemImage);
+        
         circle = new Circle(10, bgColor);
         circle.setMouseTransparent(false);
         circle.setOnMouseReleased(e -> {

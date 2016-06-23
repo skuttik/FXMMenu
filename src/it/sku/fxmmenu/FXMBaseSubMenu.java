@@ -34,15 +34,13 @@ public class FXMBaseSubMenu extends FXMMenu implements FXMAbstractItem {
     protected void setItems(FXMBaseMenuItem submenuItem, FXMBaseMenuItem backItem) {
         this.backItem = backItem;
         this.backItem.setOnPressed(e -> {
-            System.out.println("BACK!");
             parentMenu.show();
             close(true);
         });
-        addCentralItem(backItem);
+        addCentralItem(this.backItem);
 
         this.submenuItem = submenuItem;
         this.submenuItem.setOnPressed(e -> {
-            System.out.println("SUBMENU in " + x + ", " + y);
             parentMenu.hide();
             open(x, y);
         });
@@ -77,4 +75,13 @@ public class FXMBaseSubMenu extends FXMMenu implements FXMAbstractItem {
         activeValue = value;
     }
 
+    public FXMBaseSubMenu setTooltipText(String text) {
+        submenuItem.setTooltipText(text);
+        return this;
+    }
+
+    public FXMBaseSubMenu setBackTooltipText(String text) {
+        backItem.setTooltipText(text);
+        return this;
+    }
 }

@@ -5,6 +5,7 @@
  */
 package it.sku.fxmmenu.internal;
 
+import it.sku.fxmmenu.FXMMenu;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -37,21 +38,22 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
 
     private final Group itemGroup;
     private Label label = null;
-    private Label tooltip = null;
     private final Arc arc;
     private double offsetX;
     private double offsetY;
     private double refSize;
     private boolean held;
-    private double holdingLength;
+    private Duration holdingLength;
     private final Timeline longPressTL;
     private EventHandler<ActionEvent> pressHandler = null;
     private EventHandler<ActionEvent> holdHandler = null;
     private EventHandler<ActionEvent> releaseHandler = null;
     private final ImageView icon;
+    private String tooltipText = null;
+    private FXMMenu parentMenu = null;
 
-    public FXMBaseMenuItem(Color labelColor, String labelText, Image itemImage, String tooltipText) {
-        holdingLength = 1.5;
+    public FXMBaseMenuItem(Color labelColor, String labelText, Image itemImage) {
+        holdingLength = Duration.seconds(1.0);
         if (itemImage != null) {
             this.icon = new ImageView(itemImage);
         } else {
@@ -61,12 +63,6 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
         if (labelText != null && !labelText.equals("")) {
             label = new Label(labelText);
         }
-
-        if (tooltipText != null) {
-            tooltip = new Label(tooltipText);
-        }
-
-        arc = new Arc();
 
         itemGroup = new Group();
 
@@ -105,6 +101,7 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
             });
         }
 
+        arc = new Arc();
         arc.setMouseTransparent(true);
         arc.setType(ArcType.OPEN);
         arc.setStrokeLineCap(StrokeLineCap.ROUND);
@@ -112,20 +109,12 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
         arc.setFill(new Color(0, 0, 0, 0));
         arc.setStartAngle(90);
 
-        if (tooltip != null) {
-            tooltip.setMouseTransparent(true);
-            tooltip.setVisible(false);
-            tooltip.setTextAlignment(TextAlignment.CENTER);
-            tooltip.setStyle("-fx-font-size: 14px; -fx-text-fill: wheat;");
-            tooltip.setBlendMode(BlendMode.ADD);
-        }
-
         offsetX = 0.0;
         offsetY = 0.0;
         held = false;
 
         longPressTL = new Timeline(
-                new KeyFrame(Duration.seconds(holdingLength), (ActionEvent event) -> {
+                new KeyFrame(holdingLength, (ActionEvent event) -> {
                     held = true;
                     if (holdHandler != null) {
                         try {
@@ -135,8 +124,8 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
                         }
                     }
                 }),
-                new KeyFrame(Duration.seconds(holdingLength / 4), new KeyValue(arc.lengthProperty(), arc.lengthProperty().getValue(), Interpolator.DISCRETE)),
-                new KeyFrame(Duration.seconds(holdingLength), new KeyValue(arc.lengthProperty(), -360, Interpolator.LINEAR))
+                new KeyFrame(holdingLength.divide(4), new KeyValue(arc.lengthProperty(), arc.lengthProperty().getValue(), Interpolator.DISCRETE)),
+                new KeyFrame(holdingLength, new KeyValue(arc.lengthProperty(), -360, Interpolator.LINEAR))
         );
         longPressTL.setOnFinished(e -> {
         });
@@ -158,9 +147,6 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
         }
         if (label != null) {
             itemGroup.getChildren().add(label);
-        }
-        if (tooltip != null) {
-            itemGroup.getChildren().add(tooltip);
         }
     }
 
@@ -205,8 +191,13 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
         return refSize;
     }
 
-    public String getTooltip() {
-        return tooltip.getText();
+    public FXMBaseMenuItem setTooltipText(String tooltipText) {
+        this.tooltipText = tooltipText;
+        return this;
+    }
+
+    public String getTooltipText() {
+        return tooltipText;
     }
 
     protected final void applyMousePressed(MouseEvent e) {
@@ -217,19 +208,15 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
     }
 
     protected final void applyMouseOver(MouseEvent e) {
-        if (activeValue) {
-            if (tooltip != null) {
-                tooltip.setVisible(true);
-            }
+        if (activeValue && tooltipText != null && parentMenu != null) {
+            parentMenu.showTooltip(tooltipText);
         }
         e.consume();
     }
 
     protected final void applyMouseOff(MouseEvent e) {
-        if (activeValue) {
-            if (tooltip != null) {
-                tooltip.setVisible(false);
-            }
+        if (activeValue && parentMenu != null) {
+            parentMenu.hideTooltip();
         }
         e.consume();
     }
@@ -250,7 +237,7 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
                 Thread.currentThread().getUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), ex);
             }
             longPressTL.stop();
-            new Timeline(new KeyFrame(Duration.seconds(holdingLength / 10), new KeyValue(arc.lengthProperty(), 0, Interpolator.EASE_OUT))).play();
+            new Timeline(new KeyFrame(holdingLength.divide(10), new KeyValue(arc.lengthProperty(), 0, Interpolator.EASE_OUT))).play();
             held = false;
         }
         e.consume();
@@ -260,10 +247,6 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
         if (label != null) {
             label.setLayoutX(offsetX + x - refSize * .3);
             label.setLayoutY(offsetY + y - refSize * .74);
-        }
-        if (tooltip != null) {
-            tooltip.setLayoutX(offsetX * 2 + x);
-            tooltip.setLayoutY(offsetY * 2 + y);
         }
         if (icon != null) {
             icon.setX(offsetX + x - icon.getImage().getWidth() / 2);
@@ -282,11 +265,11 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
     public void close(boolean animated) {
     }
 
-    public double getHoldingLength() {
+    public Duration getHoldingLength() {
         return holdingLength;
     }
 
-    public void setHoldingLength(double holdingLength) {
+    public void setHoldingLength(Duration holdingLength) {
         this.holdingLength = holdingLength;
     }
 
@@ -305,4 +288,7 @@ abstract public class FXMBaseMenuItem implements FXMAbstractItem {
         return this;
     }
 
+    public void setParentMenu(FXMMenu parentMenu) {
+        this.parentMenu = parentMenu;
+    }
 }

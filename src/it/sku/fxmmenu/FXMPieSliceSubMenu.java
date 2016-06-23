@@ -13,19 +13,18 @@ import javafx.scene.paint.Color;
  *
  * @author skuttik
  */
-public class FXMPieSliceSubMenu extends FXMBaseSubMenu{
+public class FXMPieSliceSubMenu extends FXMBaseSubMenu {
 
     public FXMPieSliceSubMenu(Color bgColor, Color labelColor, String labelText, Image itemImage, String tooltipText, FXMMenu parentMenu, FillingStyle submenuStyle, Color submenuColor) {
         super(parentMenu, submenuStyle, submenuColor);
-        FXMBaseMenuItem submenuItem = new FXMPieSliceItem(bgColor, labelColor, labelText, itemImage, tooltipText);
+        FXMBaseMenuItem submenuItem = new FXMPieSliceItem(bgColor, labelColor, labelText, itemImage);
         submenuItem.setOnHold(null);
         submenuItem.setOnHoldReleased(null);
 
-        FXMBaseMenuItem backItem = new FXMCircularItem(bgColor, labelColor, labelText, itemImage, tooltipText);
+        FXMBaseMenuItem backItem = new FXMCircularItem(bgColor, labelColor, labelText, itemImage);
         backItem.setOnHold(null);
         backItem.setOnHoldReleased(null);
-        
+
         setItems(submenuItem, backItem);
     }
-    
 }

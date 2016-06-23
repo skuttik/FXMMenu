@@ -5,6 +5,7 @@
  */
 package it.sku.fxmmenu.internal;
 
+import it.sku.fxmmenu.FXMMenu;
 import javafx.scene.Group;
 import javafx.scene.Node;
 
@@ -12,15 +13,15 @@ import javafx.scene.Node;
  *
  * @author skuttik
  */
-abstract public interface FXMAbstractItem {
+public interface FXMAbstractItem {
 
-    abstract void arrange(double size, int totalNumber, int index);
+    void arrange(double size, int totalNumber, int index);
 
-    abstract void setMenuCenter(Group container, double x, double y);
+    void setMenuCenter(Group container, double x, double y);
 
-    abstract Node getNode();
+    Node getNode();
 
-    abstract void setActive(boolean value);
+    void setActive(boolean value);
 
-    abstract void close(boolean animated);
+    void close(boolean animated);
 }

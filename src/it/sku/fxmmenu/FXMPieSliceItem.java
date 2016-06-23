@@ -22,8 +22,8 @@ public class FXMPieSliceItem extends FXMBaseMenuItem {
 
     private Arc pieSlice = null;
 
-    public FXMPieSliceItem(Color bgColor, Color labelColor, String labelText, Image itemImage, String tooltipText) {
-        super(labelColor, labelText, itemImage, tooltipText);
+    public FXMPieSliceItem(Color bgColor, Color labelColor, String labelText, Image itemImage) {
+        super(labelColor, labelText, itemImage);
         pieSlice = new Arc();
         pieSlice.setMouseTransparent(false);
         pieSlice.setType(ArcType.OPEN);
@@ -66,7 +66,7 @@ public class FXMPieSliceItem extends FXMBaseMenuItem {
         if (index == -1) {
             System.err.println(this.getClass() + ": ERROR - central item cannot be PIE");
         } else {
-            double sliceLen = 360 / totalNumber - totalNumber * 1;
+            double sliceLen = 360 / totalNumber - totalNumber * 0.5;
             pieSlice.setLength(sliceLen);
             pieSlice.setStartAngle(90 - sliceLen / 2 - 360 / totalNumber * index);
             pieSlice.setStrokeWidth(size * 0.66);
@@ -75,5 +75,4 @@ public class FXMPieSliceItem extends FXMBaseMenuItem {
         }
         baseArrange(size, totalNumber, index);
     }
-
 }
