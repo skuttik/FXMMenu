@@ -9,6 +9,7 @@ import it.sku.fxmmenu.FXMMenu;
 import it.sku.fxmmenu.FXMBaseSubMenu;
 import it.sku.fxmmenu.FXMCircularItem;
 import it.sku.fxmmenu.FXMCircularSubMenu;
+import it.sku.fxmmenu.FXMMenu.FillingStyle;
 import it.sku.fxmmenu.FXMPieSliceItem;
 import it.sku.fxmmenu.FXMPieSliceSubMenu;
 import javafx.application.Application;
@@ -73,34 +74,44 @@ public class Test extends Application {
         FXMMenu menu = new FXMMenu(parent, 70, FXMMenu.FillingStyle.EMPTY, new Color(0.5, 0.5, 0.5, 0.65));
 
         ////// SUBMENU ///////////////////////////////
-        FXMBaseSubMenu submenu = new FXMCircularSubMenu(Color.CADETBLUE, Color.WHITE, "S", null, "Submenu", menu,
-                FXMMenu.FillingStyle.CIRCULAR, Color.CADETBLUE.deriveColor(1.0, 1.0, 1.0, 0.4));
+        FXMBaseSubMenu submenu = new FXMCircularSubMenu(Color.CADETBLUE, Color.WHITE, "S", null, menu,
+                FXMMenu.FillingStyle.CIRCULAR, Color.CADETBLUE.deriveColor(1.0, 1.0, 1.0, 0.4))
+                .setTooltipText("Submenu")
+                .setBackTooltipText("Back");
 
-        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "A", null, "function S - A")
+        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "A", null)
+                .setTooltipText("function S - A")
                 .setOnPressed(e -> System.out.println("S-A")));
-        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "B", null, "function S - B")
-                .setOnPressed(e -> System.out.println("S-A")));
-        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "C", null, "function S - C")
-                .setOnPressed(e -> System.out.println("S-A")));
-        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "D", null, "function S - D")
-                .setOnPressed(e -> System.out.println("S-A")));
-        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "E", null, "function S - E")
-                .setOnPressed(e -> System.out.println("S-A")));
+        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "B", null)
+                .setTooltipText("function S - B")
+                .setOnPressed(e -> System.out.println("S-B")));
+        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "C", null)
+                .setTooltipText("function S - C")
+                .setOnPressed(e -> System.out.println("S-C")));
+        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "D", null)
+                .setTooltipText("function S - D")
+                .setOnPressed(e -> System.out.println("S-D")));
+        submenu.add(new FXMCircularItem(Color.CADETBLUE.darker(), Color.WHITE, "E", null)
+                .setTooltipText("function S - E")
+                .setOnPressed(e -> System.out.println("S-E")));
         ///////////////////////////////////////////////
 
-        menu.addCentralItem(new FXMCircularItem(Color.DIMGRAY, Color.BLACK, "X", null, "Close").
-                setOnPressed(e -> menu.close(true)));
+        menu.addCentralItem(new FXMCircularItem(Color.DIMGRAY, Color.BLACK, "X", null)
+                .setTooltipText("Close")
+                .setOnPressed(e -> menu.close(true)));
 
-        menu.add(new FXMCircularItem(Color.RED, Color.WHITE, "Q", null, "Quit").
-                setOnPressed(e -> Platform.exit()));
+        menu.add(new FXMCircularItem(Color.RED, Color.WHITE, "Q", null)
+                .setTooltipText("Quit")
+                .setOnPressed(e -> Platform.exit()));
 
         menu.add(submenu);
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 4; i++) {
             String lbl = "" + i;
-            menu.add(new FXMCircularItem(Color.CORAL, Color.BLACK, lbl, null, lbl).
-                    setOnHold(e -> System.out.println("HOLD " + lbl)).
-                    setOnPressed(e -> System.out.println("PRESSED " + lbl)).
-                    setOnHoldReleased(e -> System.out.println("RELEASED " + lbl)));
+            menu.add(new FXMCircularItem(Color.CORAL, Color.BLACK, lbl, null)
+                    .setTooltipText(lbl)
+                    .setOnHold(e -> System.out.println("HOLD " + lbl))
+                    .setOnPressed(e -> System.out.println("PRESSED " + lbl))
+                    .setOnHoldReleased(e -> System.out.println("RELEASED " + lbl)));
         }
         return menu;
     }
@@ -119,40 +130,48 @@ public class Test extends Application {
         /////////////////////////////////////////////
 
         Color gcol = new Color(0.5, 0.5, 0.5, 0.65);
-        
-        FXMMenu menu = new FXMMenu(parent, 65, FXMMenu.FillingStyle.CIRCULAR, gcol);
+
+        FXMMenu menu = new FXMMenu(parent, 50, FXMMenu.FillingStyle.CIRCULAR, gcol);
 
         ////// SUBMENU ///////////////////////////////
         FXMBaseSubMenu submenu = new FXMPieSliceSubMenu(Color.DIMGRAY, Color.WHITE, "", btnConfigImage, "Config", menu,
                 FXMMenu.FillingStyle.CIRCULAR, Color.CADETBLUE.deriveColor(1.0, 1.0, 1.0, 0.4));
 
-        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnStreetsImage, "Streets on"));
-        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnPencilImage, "Set parameters"));
-        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnRubberImage, "Reset parameters"));
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnStreetsImage)
+                .setTooltipText("Streets on"));
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnPencilImage)
+                .setTooltipText("Set parameters"));
+        submenu.add(new FXMPieSliceItem(gcol.darker(), Color.WHITE, "", btnRubberImage)
+                .setTooltipText("Reset parameters"));
         ///////////////////////////////////////////////
 
-        menu.addCentralItem(new FXMCircularItem(Color.DIMGRAY, Color.BLACK, "", btnCloseImage, "Close").
-                setOnPressed(e -> menu.close(true)));
+        menu.addCentralItem(new FXMCircularItem(Color.DIMGRAY, Color.BLACK, "", btnCloseImage)
+                .setTooltipText("Close")
+                .setOnPressed(e -> menu.close(true)));
 
-        menu.add(new FXMPieSliceItem(Color.RED, Color.WHITE, "", btnCloseImage, "Quit").
-                setOnPressed(e -> Platform.exit()));
+        menu.add(new FXMPieSliceItem(Color.RED, Color.WHITE, "", btnCloseImage)
+                .setTooltipText("Quit")
+                .setOnPressed(e -> Platform.exit()));
 
         menu.add(submenu);
 
-        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnSelectionImage, "Item selection").
-                setOnHold(e -> System.out.println("HOLD Item selection")).
-                setOnPressed(e -> System.out.println("PRESSED Item selection")).
-                setOnHoldReleased(e -> System.out.println("RELEASED Item selection")));
+        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnSelectionImage)
+                .setTooltipText("Item selection")
+                .setOnHold(e -> System.out.println("HOLD Item selection"))
+                .setOnPressed(e -> System.out.println("PRESSED Item selection"))
+                .setOnHoldReleased(e -> System.out.println("RELEASED Item selection")));
 
-        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnSpotImage, "Spotlight").
-                setOnHold(e -> System.out.println("HOLD Spotlight")).
-                setOnPressed(e -> System.out.println("PRESSED Spotlight")).
-                setOnHoldReleased(e -> System.out.println("RELEASED Spotlight")));
+        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnSpotImage)
+                .setTooltipText("Spotlight")
+                .setOnHold(e -> System.out.println("HOLD Spotlight"))
+                .setOnPressed(e -> System.out.println("PRESSED Spotlight"))
+                .setOnHoldReleased(e -> System.out.println("RELEASED Spotlight")));
 
-        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnTrackingImage, "Tracking").
-                setOnHold(e -> System.out.println("HOLD Tracking")).
-                setOnPressed(e -> System.out.println("PRESSED Tracking")).
-                setOnHoldReleased(e -> System.out.println("RELEASED Tracking")));
+        menu.add(new FXMPieSliceItem(Color.GRAY, Color.BLACK, null, btnTrackingImage)
+                .setTooltipText("Tracking")
+                .setOnHold(e -> System.out.println("HOLD Tracking"))
+                .setOnPressed(e -> System.out.println("PRESSED Tracking"))
+                .setOnHoldReleased(e -> System.out.println("RELEASED Tracking")));
 
         return menu;
     }
