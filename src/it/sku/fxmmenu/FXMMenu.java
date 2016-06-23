@@ -61,7 +61,7 @@ public class FXMMenu {
 
     private DoubleProperty tooltipPositionOffset = new SimpleDoubleProperty(0);
 
-    private double hiddenOpacity = 0.15;
+    private double hiddenOpacity = 0.25;
     private Duration delay = Duration.seconds(1);
     private Duration inDuration = Duration.seconds(0.3);
     private Duration outDuration = Duration.seconds(0.3);
